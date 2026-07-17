@@ -1,0 +1,16 @@
+allowBuilds:
+  sharp: true
+  unrs-resolver: true
+  esbuild: true
+  '@tailwindcss/oxide': true
+  msw: true
+  '@parcel/watcher': true
+  '@swc/core': true
+onlyBuiltDependencies:
+  - sharp
+  - unrs-resolver
+  - esbuild
+  - '@tailwindcss/oxide'
+  - msw
+  - '@parcel/watcher'
+  - '@swc/core'

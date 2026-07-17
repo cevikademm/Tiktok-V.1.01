@@ -1,0 +1,240 @@
+@import "tailwindcss";
+
+/* =============================================================================
+   LiveKit — Tema Token'ları (PRD §4.1 hex tablosu birebir)
+   Kural: Bileşenlerde hex YASAK. Yalnız bu token'lar / semantic Tailwind sınıfları.
+   ============================================================================= */
+
+:root {
+  /* Marka */
+  --primary: #d43555;
+  --primary-dark: #661525;
+  --primary-darker: #570d1c;
+  --accent: #ef3f62;
+  --tiktok-red: #fe2c55;
+
+  /* Kabuk (shell) */
+  --sidebar-bg: #2e1f22;
+  --topbar-bg: #343333;
+  --topbar-glow: rgba(212, 53, 85, 0.14);
+
+  /* Yüzeyler */
+  --surface-0: #1c1c1c;
+  --surface-1: #212121;
+  --surface-2: #222222;
+  --surface-3: #2a2a2a;
+  --surface-4: #303030;
+  --secondary: var(--surface-1);
+
+  /* Çerçeveler */
+  --border-maroon: #92223e;
+  --border-soft: #3f3f3f;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+
+  /* Tipografi renkleri */
+  --heading-blue: #37a1dc;
+  --heading-blue-bright: #42a9ff;
+  --link-blue: #53afdf;
+  --link-blue-hover: #359bd4;
+  --text-muted: #949494;
+  --text-muted-2: #9b9b9b;
+  --foreground: #ffffff;
+  --background: var(--surface-0);
+
+  /* Durum */
+  --warning: #fdb100;
+  --success-banner: #2d4b2e;
+  --error: #da5454;
+  --error-strong: #e73c3c;
+  --news-bg: #122531;
+  --discord: #4d6bee;
+
+  /* PRO promo */
+  --pro-gradient: linear-gradient(45deg, #591650 0%, #162c5f 50%);
+
+  /* Sidebar bubble aksanları (PRD §4.1) */
+  --bubble-start: #ff5c7f;
+  --bubble-setup: #3aff68;
+  --bubble-layers: #5ec4ff;
+  --bubble-actions: #af54ff;
+  --bubble-sounds: #60f7c8;
+  --bubble-chat: #b1ff3b;
+  --bubble-points: #ff5c7f;
+  --bubble-song: #ff73f3;
+  --bubble-tools: #6471ff;
+  --bubble-agencies: #00823f;
+
+  /* Bubble state (PRD §4.3) */
+  --bubble-bg: rgba(255, 255, 255, 0.06);
+  --bubble-bg-hover: rgba(255, 255, 255, 0.2);
+
+  /* Layout metrikleri (PRD §4.3 — SABİT) */
+  --topbar-h: 54px;
+  --rail-w: 64px;
+  --submenu-w: 256px;
+  --card-w: 902px;
+  --card-w-min: 860px;
+  --card-radius: 10px;
+  --banner-top: 62px;
+
+  /* Hareket */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-standard: 200ms;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-darker: var(--primary-darker);
+  --color-accent: var(--accent);
+  --color-tiktok: var(--tiktok-red);
+
+  --color-sidebar: var(--sidebar-bg);
+  --color-topbar: var(--topbar-bg);
+
+  --color-surface-0: var(--surface-0);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-surface-4: var(--surface-4);
+  --color-secondary: var(--secondary);
+
+  --color-border-maroon: var(--border-maroon);
+  --color-border-soft: var(--border-soft);
+
+  --color-heading: var(--heading-blue);
+  --color-heading-bright: var(--heading-blue-bright);
+  --color-link: var(--link-blue);
+  --color-link-hover: var(--link-blue-hover);
+  --color-muted: var(--text-muted);
+  --color-muted-2: var(--text-muted-2);
+
+  --color-warning: var(--warning);
+  --color-success-banner: var(--success-banner);
+  --color-error: var(--error);
+  --color-error-strong: var(--error-strong);
+  --color-news: var(--news-bg);
+  --color-discord: var(--discord);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-form: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --spacing-topbar: var(--topbar-h);
+  --spacing-rail: var(--rail-w);
+  --spacing-submenu: var(--submenu-w);
+}
+
+/* -------------------------------------------------------------------------- */
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  overflow: hidden;
+}
+
+/* Form alanlarında Inter (PRD §4.2) */
+input,
+textarea,
+select {
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Odak görünürlüğü — WCAG 2.2 AA (PRD §13) */
+:focus-visible {
+  outline: 2px solid var(--link-blue);
+  outline-offset: 2px;
+}
+
+/* İnce kaydırma çubuğu (koyu tema) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--surface-4) transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--surface-4);
+  border-radius: 4px;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--border-soft);
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* PRO promo kutusu — shakeEffect (PRD §4.3) */
+@keyframes shakeEffect {
+  0%,
+  92%,
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+  93%,
+  97% {
+    transform: translateX(-2px) rotate(-0.6deg);
+  }
+  95%,
+  99% {
+    transform: translateX(2px) rotate(0.6deg);
+  }
+}
+.animate-shake {
+  animation: shakeEffect 4s var(--ease-standard) infinite;
+}
+
+/* LIVE rozetinde parlama (PRD §5.1 — Live Channels) */
+@keyframes livePulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(254, 44, 85, 0.6);
+  }
+  50% {
+    opacity: 0.75;
+    box-shadow: 0 0 6px 2px rgba(254, 44, 85, 0);
+  }
+}
+.animate-live {
+  animation: livePulse 1.6s var(--ease-standard) infinite;
+}
+
+/* Sonsuz logo marquee (PRD §5.1 — Ajanslar) */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
