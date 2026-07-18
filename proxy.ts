@@ -30,9 +30,11 @@ export default async function proxy(request: NextRequest) {
 export const config = {
   /**
    * Locale yönlendirmesinden muaf yollar:
-   *  - api, widget: locale'siz yüzeyler (OBS browser source / route handler).
+   *  - api, auth, widget: locale'siz yüzeyler (route handler / OAuth callback / OBS source).
+   *    `auth` MUTLAKA muaf olmalı — aksi halde /auth/callback next-intl tarafından
+   *    /tr/auth/callback'e rewrite edilir ve 404 olur (OAuth geri dönüşü kırılır).
    *  - icon, apple-icon, pwa-icon: metadata/PWA ikon route'ları (locale prefix'i 404 yapar).
    *  - _next, _vercel ve nokta içeren istekler (manifest.webmanifest, sw.js, statik dosyalar).
    */
-  matcher: ["/((?!api|widget|icon|apple-icon|pwa-icon|_next|_vercel|.*\\..*).*)"],
+  matcher: ["/((?!api|auth|widget|icon|apple-icon|pwa-icon|_next|_vercel|.*\\..*).*)"],
 };
