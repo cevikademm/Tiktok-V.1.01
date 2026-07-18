@@ -278,8 +278,23 @@ async function main(): Promise<void> {
     `[connector] başladı · poll ${POLL_MS}ms · Supabase ${SUPABASE_URL.replace(/^https?:\/\//, "")}`,
   );
 
-  await poll();
-  setInterval(() => void poll(), POLL_MS);
+  // İlk poll hata verse bile süreç ölmesin — sonraki döngüde tekrar dener.
+  await poll().catch((e) => console.error("[connector] ilk poll hatası:", e));
+  setInterval(() => {
+    poll().catch((e) => console.error("[connector] poll hatası:", e));
+  }, POLL_MS);
 }
 
-void main();
+// 24/7 worker dayanıklılığı: geçici hatalar (ağ, Euler WS, Supabase) süreci
+// ÖLDÜRMESİN. Logla ve devam et — Railway crash/restart-loop'unu önler.
+process.on("unhandledRejection", (reason) => {
+  console.error("[connector] unhandledRejection:", reason);
+});
+process.on("uncaughtException", (err) => {
+  console.error("[connector] uncaughtException:", err);
+});
+
+main().catch((err) => {
+  console.error("[connector] main başlatma hatası:", err);
+  process.exit(1);
+});
