@@ -1,0 +1,12 @@
+# Connector Docker imajına GİRMEYECEKLER (Railway/Docker build)
+node_modules
+.next
+.git
+.env
+.env.*
+!.env.example
+*.log
+.data
+coverage
+playwright-report
+test-results
