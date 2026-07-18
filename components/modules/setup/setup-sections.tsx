@@ -2,9 +2,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { CheckCircle2, ExternalLink, Loader2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { SignOutButton } from "@/components/modules/auth/sign-out-button";
 import { useApp } from "@/components/providers/app-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,8 @@ import {
   type SetupSettings,
   type TiktokAccountForm,
 } from "@/lib/schemas/settings";
+import { useUser } from "@/lib/supabase/use-user";
+import { useDebugMode } from "@/lib/use-debug-mode";
 import { APP_NAME } from "@/lib/utils";
 
 /**
@@ -609,24 +612,29 @@ export function PatreonSection() {
 /* 11 — Hesabınız */
 export function AccountSection() {
   const t = useTranslations();
+  const locale = useLocale();
+  const { user } = useUser();
+
+  const signupDate = user?.created_at
+    ? new Date(user.created_at).toLocaleDateString(locale)
+    : "—";
+
   return (
     <Card id="section-account">
       <CardTitle>{t("setup.sections.account")}</CardTitle>
       <dl className="mt-4 grid max-w-md grid-cols-2 gap-y-2 text-sm">
         <dt className="text-muted">{t("setup.account.userId")}</dt>
-        <dd className="text-white">—</dd>
+        <dd className="truncate text-white">{user?.id ?? "—"}</dd>
         <dt className="text-muted">{t("setup.account.email")}</dt>
-        <dd className="text-white">—</dd>
+        <dd className="truncate text-white">{user?.email ?? "—"}</dd>
         <dt className="text-muted">{t("setup.account.signupDate")}</dt>
-        <dd className="text-white">—</dd>
+        <dd className="text-white">{signupDate}</dd>
       </dl>
       <div className="mt-4 flex gap-2">
         <Button variant="outline" size="sm">
           {t("setup.account.tiktokLogin")}
         </Button>
-        <Button variant="ghost" size="sm">
-          {t("auth.signOut")}
-        </Button>
+        <SignOutButton variant="ghost" size="sm" />
       </div>
     </Card>
   );
@@ -769,11 +777,8 @@ export function AdvancedSection() {
 export function DebugSection() {
   const t = useTranslations();
   const { backend } = useApp();
-  const [debug, setDebug] = useState(false);
-
-  useEffect(() => {
-    void backend.settings.get().then((s) => setDebug(s.debug.debugMode));
-  }, [backend]);
+  // Tek reaktif kaynak: DebugPanel ile paylaşılan localStorage bayrağı.
+  const [debug, setDebug] = useDebugMode();
 
   return (
     <Card id="section-debug">
@@ -783,10 +788,12 @@ export function DebugSection() {
           checked={debug}
           onChange={(next) => {
             setDebug(next);
+            // Ayar kaydını da güncelle (dışa aktarma bütünlüğü için).
             void backend.settings.patch({ debug: { debugMode: next } });
           }}
           label={t("setup.debug.enable")}
         />
+        <p className="text-xs text-muted">{t("setup.debug.hint")}</p>
         <Button variant="outline" size="sm" className="w-fit">
           {t("setup.debug.openTiktok")}
         </Button>

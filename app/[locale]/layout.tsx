@@ -1,13 +1,19 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppProvider } from "@/components/providers/app-provider";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { routing } from "@/lib/i18n/routing";
 import { APP_NAME } from "@/lib/utils";
 import "../globals.css";
+
+/** PWA tema rengi — tarayıcı çubuğu ve standalone başlık çubuğu (PRD §4.1 --primary). */
+export const viewport: Viewport = {
+  themeColor: "#D43555",
+};
 
 /**
  * PRD §4.2 — Birincil UI: Outfit; form alanlarında Inter.
@@ -53,6 +59,14 @@ export async function generateMetadata({
   return {
     title: { default: APP_NAME, template: `%s · ${APP_NAME}` },
     description: t("tagline"),
+    // PWA manifest'i app/manifest.ts üretir; Next <link rel="manifest"> ekler.
+    manifest: "/manifest.webmanifest",
+    // iOS standalone: tam ekran, başlık ve durum çubuğu davranışı.
+    appleWebApp: {
+      capable: true,
+      title: APP_NAME,
+      statusBarStyle: "black-translucent",
+    },
     // SEO hreflang alternates — PRD §11.
     alternates: {
       languages: Object.fromEntries(routing.locales.map((l) => [l, `/${l}`])),
@@ -79,6 +93,8 @@ export default async function LocaleLayout({
         <NextIntlClientProvider>
           <AppProvider>{children}</AppProvider>
         </NextIntlClientProvider>
+        {/* PWA service worker kaydı — yalnız üretimde etkin (bileşen içinde kapılı). */}
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

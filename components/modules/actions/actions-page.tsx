@@ -3,7 +3,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Play, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useApp } from "@/components/providers/app-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardTitle } from "@/components/ui/card";
@@ -16,6 +16,8 @@ import type { SimulateKind } from "@/lib/data/mock/simulator";
 import { ACTION_MEDIA_COLUMN, type Action } from "@/lib/schemas/action";
 import type { StreamEvent, StreamTimer } from "@/lib/schemas/event";
 import type { OverlayScreen } from "@/lib/schemas/widget";
+import { useOverlayId } from "@/lib/overlay/use-overlay-id";
+import { useScreenPresence } from "@/lib/overlay/use-screen-presence";
 import { useLocalStorage } from "@/lib/use-local-storage";
 import { cn } from "@/lib/utils";
 import { ActionEditor } from "./action-editor";
@@ -34,11 +36,11 @@ const MASTER_DEFAULT = true;
 export function ActionsAndEventsPage() {
   const t = useTranslations();
   const toast = useToast();
-  const { backend, actions, events, refresh, dispatch, entitlementsLimit } = useAppWithLimits();
+  const { backend, actions, events, timers, refresh, dispatch, entitlementsLimit } =
+    useAppWithLimits();
 
   // Ana "Enabled" toggle'ı — PRD §5.3, localStorage'da kalıcı.
   const [enabled, setEnabled] = useLocalStorage<boolean>(MASTER_KEY, MASTER_DEFAULT);
-  const [timers, setTimers] = useState<StreamTimer[]>([]);
   const [screens, setScreens] = useState<OverlayScreen[]>([]);
 
   const [editingAction, setEditingAction] = useState<Action | null>(null);
@@ -46,12 +48,56 @@ export function ActionsAndEventsPage() {
   const [editingEvent, setEditingEvent] = useState<StreamEvent | null>(null);
   const [eventOpen, setEventOpen] = useState(false);
   const [timerOpen, setTimerOpen] = useState(false);
+  const [editingTimer, setEditingTimer] = useState<StreamTimer | null>(null);
   const [timerDraft, setTimerDraft] = useState({ intervalMinutes: 5, actionId: "" });
+  // Overlay kimliği — hidrasyon-güvenli (useSyncExternalStore).
+  const overlayId = useOverlayId();
+  // Canlı ekran durumu — bağlı (OBS/tarayıcı kaynağı) Screen 1-8 seti.
+  // Supabase modunda Presence, yerelde SSE hub durum poll'u (transport otomatik).
+  const onlineScreens = useScreenPresence(overlayId);
 
   useEffect(() => {
-    void backend.timers.list().then(setTimers);
     void backend.screens.list().then(setScreens);
   }, [backend]);
+
+  /** Timer editörünü aç — create (timer=null) veya edit. */
+  const openTimerEditor = useCallback((timer: StreamTimer | null) => {
+    setEditingTimer(timer);
+    setTimerDraft({
+      intervalMinutes: timer?.intervalMinutes ?? 5,
+      actionId: timer?.actionId ?? "",
+    });
+    setTimerOpen(true);
+  }, []);
+
+  /** Sunucu-otoriteli overlay'i test et — gerçek hediye olmadan (ADR-0002). */
+  const testServerOverlay = useCallback(
+    async (screen: number) => {
+      if (!overlayId) return;
+      try {
+        const res = await fetch("/api/overlay/simulate", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ id: overlayId, kind: "gift", coins: 100 }),
+        });
+        const data = (await res.json()) as { matched?: number; message?: string };
+        if (!res.ok) {
+          toast.show(data.message ?? t("actionsandevents.simulator.noMatch"), "error");
+          return;
+        }
+        if (!data.matched) {
+          toast.show(t("actionsandevents.simulator.noMatch"), "info");
+          return;
+        }
+        toast.show(
+          t("actionsandevents.overlay.testSent", { screen, count: data.matched }),
+        );
+      } catch {
+        toast.show(t("actionsandevents.simulator.noMatch"), "error");
+      }
+    },
+    [overlayId, t, toast],
+  );
 
   /* ---------------------------------------------------------------- Actions */
 
@@ -230,7 +276,17 @@ export function ActionsAndEventsPage() {
       {
         id: "active",
         header: () => t("actionsandevents.table.active"),
-        cell: ({ row }) => (row.original.active ? "✓" : "—"),
+        cell: ({ row }) => (
+          <Toggle
+            checked={row.original.active}
+            onChange={async (next) => {
+              const { id, ...draft } = row.original;
+              await backend.timers.update(id, { ...draft, active: next });
+              refresh();
+            }}
+            label={t("actionsandevents.table.active")}
+          />
+        ),
       },
       { accessorKey: "intervalMinutes", header: () => t("actionsandevents.table.interval") },
       {
@@ -242,22 +298,32 @@ export function ActionsAndEventsPage() {
         id: "rowActions",
         header: () => t("actionsandevents.table.rowActions"),
         cell: ({ row }) => (
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label={t("common.delete")}
-            onClick={async () => {
-              await backend.timers.remove(row.original.id);
-              setTimers(await backend.timers.list());
-              toast.show(t("actionsandevents.toast.timerDeleted"));
-            }}
-          >
-            <Trash2 className="size-3.5" aria-hidden />
-          </Button>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("common.edit")}
+              onClick={() => openTimerEditor(row.original)}
+            >
+              <Pencil className="size-3.5" aria-hidden />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label={t("common.delete")}
+              onClick={async () => {
+                await backend.timers.remove(row.original.id);
+                refresh();
+                toast.show(t("actionsandevents.toast.timerDeleted"));
+              }}
+            >
+              <Trash2 className="size-3.5" aria-hidden />
+            </Button>
+          </div>
         ),
       },
     ],
-    [t, actions, backend, toast],
+    [t, actions, backend, toast, refresh, openTimerEditor],
   );
 
   /* ---------------------------------------------------------------- Screens */
@@ -285,10 +351,16 @@ export function ActionsAndEventsPage() {
         id: "screenUrl",
         header: () => t("actionsandevents.table.screenUrl"),
         cell: ({ row }) => {
-          const url = backend.widgets.url("myactions", { screen: row.original.screen });
+          // Gerçek OBS köprüsü: overlay kimliği (id) URL'e eklenir (ADR-0002).
+          const url = backend.widgets.url(
+            "myactions",
+            overlayId
+              ? { id: overlayId, screen: row.original.screen }
+              : { screen: row.original.screen },
+          );
           return (
             <div className="flex items-center gap-1.5">
-              <code className="max-w-[280px] truncate text-xs text-muted">{url}</code>
+              <code className="max-w-[240px] truncate text-xs text-muted">{url}</code>
               <Button
                 variant="ghost"
                 size="sm"
@@ -298,6 +370,14 @@ export function ActionsAndEventsPage() {
                 }}
               >
                 {t("common.copy")}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => void testServerOverlay(row.original.screen)}
+                title={t("actionsandevents.overlay.testHint")}
+              >
+                {t("actionsandevents.overlay.test")}
               </Button>
             </div>
           );
@@ -325,19 +405,23 @@ export function ActionsAndEventsPage() {
       {
         id: "status",
         header: () => t("actionsandevents.table.status"),
-        cell: ({ row }) => (
-          <span
-            className={cn("text-xs")}
-            style={{ color: row.original.online ? "var(--link-blue)" : "var(--accent)" }}
-          >
-            {row.original.online
-              ? t("actionsandevents.table.online")
-              : t("actionsandevents.table.offline")}
-          </span>
-        ),
+        cell: ({ row }) => {
+          // Kaynak: canlı bağlantı seti (Presence/SSE) — süreçler-arası gerçek durum.
+          const online = onlineScreens.has(row.original.screen);
+          return (
+            <span
+              className={cn("text-xs")}
+              style={{ color: online ? "var(--link-blue)" : "var(--accent)" }}
+            >
+              {online
+                ? t("actionsandevents.table.online")
+                : t("actionsandevents.table.offline")}
+            </span>
+          );
+        },
       },
     ],
-    [t, backend, toast],
+    [t, backend, toast, overlayId, testServerOverlay, onlineScreens],
   );
 
   /* -------------------------------------------------------------- Simulator */
@@ -350,10 +434,24 @@ export function ActionsAndEventsPage() {
     { kind: "gift", labelKey: "actionsandevents.simulator.gift" },
   ];
 
-  function runSimulation(kind: SimulateKind, options?: { likes?: number }) {
+  async function runSimulation(kind: SimulateKind, options?: { likes?: number }) {
+    // 1) Aynı-tarayıcı önizleme: istemci kural motoru + bus (anında geri bildirim).
     const event = backend.simulator.simulate(kind, options);
     const result = dispatch(event);
 
+    // 2) Gerçek bağlı ekran(lar): sunucu-otoriteli yol (SSE hub / Supabase broadcast).
+    //    Best-effort — overlay henüz senkronlanmadıysa (404) önizleme yine çalışır.
+    if (overlayId) {
+      void fetch("/api/overlay/simulate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ id: overlayId, kind, likes: options?.likes }),
+      }).catch(() => {
+        // Ağ hatası — önizleme dispatch'i zaten çalıştı.
+      });
+    }
+
+    // Toast'lar önizleme (dispatch) sonucundan — PRD §5.3.
     if (result.matchedRules.length === 0) {
       toast.show(t("actionsandevents.simulator.noMatch"), "info");
       return;
@@ -451,7 +549,11 @@ export function ActionsAndEventsPage() {
       <Card id="section-timers" className={cn(!enabled && "opacity-60")}>
         <div className="mb-3 flex items-center justify-between">
           <CardTitle className="mb-0">{t("actionsandevents.timersTitle")}</CardTitle>
-          <Button size="sm" onClick={() => setTimerOpen(true)} disabled={actions.length === 0}>
+          <Button
+            size="sm"
+            onClick={() => openTimerEditor(null)}
+            disabled={actions.length === 0}
+          >
             {t("actionsandevents.createTimer")}
           </Button>
         </div>
@@ -488,7 +590,7 @@ export function ActionsAndEventsPage() {
               variant="secondary"
               size="sm"
               disabled={!enabled}
-              onClick={() => runSimulation(s.kind, s.options)}
+              onClick={() => void runSimulation(s.kind, s.options)}
             >
               {t(s.labelKey)}
             </Button>
@@ -513,11 +615,15 @@ export function ActionsAndEventsPage() {
         onSaved={(m) => toast.show(m)}
       />
 
-      {/* Timer editörü */}
+      {/* Timer editörü — create + edit */}
       <Modal
         open={timerOpen}
         onClose={() => setTimerOpen(false)}
-        title={t("actionsandevents.editor.newTimer")}
+        title={
+          editingTimer
+            ? t("actionsandevents.editor.editTimer")
+            : t("actionsandevents.editor.newTimer")
+        }
         size="sm"
         footer={
           <>
@@ -529,12 +635,20 @@ export function ActionsAndEventsPage() {
               onClick={async () => {
                 const actionId = timerDraft.actionId || actions[0]?.id;
                 if (!actionId) return;
-                await backend.timers.create({
-                  active: true,
-                  intervalMinutes: timerDraft.intervalMinutes,
-                  actionId,
-                });
-                setTimers(await backend.timers.list());
+                if (editingTimer) {
+                  await backend.timers.update(editingTimer.id, {
+                    active: editingTimer.active,
+                    intervalMinutes: timerDraft.intervalMinutes,
+                    actionId,
+                  });
+                } else {
+                  await backend.timers.create({
+                    active: true,
+                    intervalMinutes: timerDraft.intervalMinutes,
+                    actionId,
+                  });
+                }
+                refresh();
                 setTimerOpen(false);
                 toast.show(t("actionsandevents.toast.timerSaved"));
               }}

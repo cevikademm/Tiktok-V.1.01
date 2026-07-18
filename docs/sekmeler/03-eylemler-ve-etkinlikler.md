@@ -126,7 +126,8 @@ ve zamanlayıcılardan da düşürür (`lib/data/mock/index.ts:63-74`).
 |---|---|---|
 | Ana "Enabled" toggle | `useLocalStorage` (`useSyncExternalStore`) — anahtar `livekit.actionsEnabled.v1` | `actions-page.tsx:30-40`, hook `lib/use-local-storage.ts:79` |
 | `actions`, `events` | `AppProvider` context — `refresh()` ile yeniden çekilir | `app-provider.tsx:65-68` |
-| `timers`, `screens` | Yerel `useState` + mount'ta `backend.*.list()` | `actions-page.tsx:41-54` |
+| `timers` | `AppProvider` context — `refresh()` ile yeniden çekilir (ADR-0005) | `app-provider.tsx` |
+| `screens` | Yerel `useState` + mount'ta `backend.screens.list()` | `actions-page.tsx` |
 | Editör açık/kapalı + düzenlenen kayıt | Yerel `useState` | `actions-page.tsx:44-49` |
 | Editör draft'ı | `useState` başlatıcısı (prop'tan bir kez) + `key` remount | `action-editor.tsx:379`, `event-editor.tsx:190` |
 | **Kuyruk / cooldown / dedup** | **`RuleEngine` singleton** — modül seviyesi, React ağacı dışında | `lib/engine/singleton.ts:16-29` |
@@ -228,10 +229,14 @@ cooldown içindeki eylem girmez (`:320`); `repeatWithCombos` combo sayısı kada
 kapalıyken tek kez (`:335`); kuyruk dolduğunda `rejected`/`queueFull` (`:341`); eylem kendi
 ekranının kuyruğuna gider (`:354`).
 
-**Kapsanmayan:** Eylem düzenleme (edit), silme onayı, "Action executed!" butonu, timer
-oluşturma/silme, ekran adı/maks kuyruk düzenleme, URL kopyalama, `signatureExists` tekrar
-hatası (etkinlik için), ana Enabled toggle'ının kalıcılığı ve 20 tipin **yapılandırma
-alanları** test edilmemiştir.
+**Zamanlayıcı (ADR-0005):** `tests/timer-runner.test.ts` (aralık/uzlaşım/başlat-durdur),
+`tests/engine.test.ts` → `fireAction` (eşleştirmesiz çalıştırma, ekran yönlendirme,
+queueFull, cooldown bypass), `tests/overlay-hub.test.ts` → timer teslimatı (abone bağlıyken
+eylem ilgili ekrana push edilir; abone gidince durur).
+
+**Kapsanmayan:** Eylem düzenleme (edit) UI'ı, silme onayı, "Action executed!" butonu, ekran
+adı/maks kuyruk düzenleme, URL kopyalama, `signatureExists` tekrar hatası (etkinlik için),
+ana Enabled toggle'ının kalıcılığı ve 20 tipin **yapılandırma alanları** test edilmemiştir.
 
 ---
 
@@ -265,9 +270,14 @@ alanları** test edilmemiştir.
    (`opacity-60`) ve simülatör butonları `disabled` olur (`actions-page.tsx:490`), ancak
    motor durdurulmaz — `bus`'tan gelen olaylar (ör. widget `preview=1` akışı) işlenmeye
    devam eder.
-8. **Timer'lar çalışmaz.** Tanımlanır ve listelenir ama hiçbir `setInterval` kurulmaz;
-   "Timer yayına girdiğinizde başlar" metni Faz 1'de karşılığı olmayan bir vaattir
-   (`actions-page.tsx:458`). PRD §6.2 "Timer olayları" Faz 2.
+8. ~~**Timer'lar çalışmaz.**~~ **ÇÖZÜLDÜ (ADR-0005).** Zamanlayıcılar artık overlay
+   runtime'ında (SSE hub + connector) çalışır: yayın canlıyken (hub'da abone / connector'da
+   upstream) her `intervalMinutes` dakikada bir bağlı eylem `RuleEngine.fireAction` ile
+   ilgili ekrana tetiklenir. Taşıma: `overlay_configs.timers` (JSONB) → `useOverlaySync` →
+   `/api/overlay/register`. Çalıştırıcı `lib/overlay/timer-runner.ts` (saf TS, test edilir).
+   Eylem düzenleme/aktif-toggle UI'ı eklendi. Kalan sınır: timer atışlarında cooldown
+   uygulanmaz (aralık tek hız sınırıdır) ve placeholder'larda kullanıcı alanları boş çözülür
+   (`systemLiveEvent`).
 9. **Ekran `online` durumu yalnız widget açıkken.** `screens.list()` `online: false`
    varsayılanıyla gelir (`lib/data/mock/store.ts:35`); widget mount olduğunda `true`,
    unmount'ta `false` yazar (`myactions.tsx:105`, `:111`). Aynı sekmede widget açık
@@ -304,3 +314,4 @@ alanları** test edilmemiştir.
 | Tarih | Sürüm | Değişiklik | Faz |
 |---|---|---|---|
 | 2026-07-16 | 0.1.0 | Faz 0-1 ilk uygulama | Faz 1 |
+| 2026-07-18 | 0.2.0 | Zamanlayıcı çalıştırıcısı (ADR-0005): timer'lar canlıyken ateşlenir; `overlay_configs.timers`, `RuleEngine.fireAction`, `timer-runner`, timer düzenleme UI | Faz 1.5 |

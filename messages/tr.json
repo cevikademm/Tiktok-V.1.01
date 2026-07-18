@@ -108,6 +108,8 @@
     "unsavedTitle": "Değişiklikler kaydedilsin mi?",
     "unsavedBody": "Kaydedilmemiş değişiklikleriniz var.",
     "onThisPage": "Bu sayfada",
+    "hideMenu": "Menüyü gizle",
+    "showMenu": "Menüyü göster",
     "pro": "PRO",
     "new": "yeni"
   },
@@ -127,11 +129,38 @@
   "auth": {
     "gateTitle": "Devam etmek için lütfen giriş yapın veya ücretsiz hesap oluşturun. (Zorunlu!)",
     "signInEmail": "E-posta ile Giriş Yapın veya Kaydolun",
-    "signInGoogle": "Google ile Giriş Yapın veya Kaydolun",
+    "signInGoogle": "Google ile devam et",
+    "signInTitle": "{app}'e giriş yap",
+    "signUpTitle": "{app} hesabı oluştur",
+    "emailLabel": "E-posta",
+    "passwordLabel": "Parola",
+    "passwordHint": "En az 6 karakter.",
+    "or": "veya",
+    "signInSubmit": "Giriş yap",
+    "signUpSubmit": "Hesap oluştur",
+    "submitting": "Gönderiliyor…",
+    "noAccount": "Hesabın yok mu?",
+    "haveAccount": "Zaten hesabın var mı?",
+    "switchToSignUp": "Kaydol",
+    "switchToSignIn": "Giriş yap",
+    "checkEmailTitle": "E-postanı kontrol et",
+    "checkEmailBody": "Hesabını onaylaman için sana bir bağlantı gönderdik. Girişi tamamlamak için e-postandaki bağlantıya tıkla.",
+    "backToSignIn": "Girişe dön",
     "legalNote": "Devam ederek {tos} ve {privacy} belgelerini kabul etmiş olursunuz.",
     "tos": "Kullanım Koşulları",
     "privacy": "Gizlilik Politikası",
-    "signOut": "Çıkış yap"
+    "signOut": "Çıkış yap",
+    "errors": {
+      "email": "Geçerli bir e-posta adresi gir.",
+      "passwordMin": "Parola en az 6 karakter olmalı.",
+      "passwordMax": "Parola en fazla 72 karakter olabilir.",
+      "invalidCredentials": "E-posta veya parola hatalı.",
+      "emailNotConfirmed": "E-postanı henüz onaylamadın. Gelen kutunu kontrol et.",
+      "userExists": "Bu e-posta ile zaten bir hesap var. Giriş yap.",
+      "rateLimited": "Çok fazla deneme yapıldı. Lütfen biraz sonra tekrar dene.",
+      "generic": "Bir şeyler ters gitti. Lütfen tekrar dene.",
+      "callback": "Giriş tamamlanamadı. Lütfen tekrar dene."
+    }
   },
   "start": {
     "title": "Başlangıç",
@@ -340,7 +369,8 @@
     },
     "debug": {
       "enable": "Hata Ayıklama Modunu Etkinleştir",
-      "openTiktok": "TikTok LIVE'ı Aç"
+      "openTiktok": "TikTok LIVE'ı Aç",
+      "hint": "Açıldığında sağ altta canlı olay akışını ve overlay durumunu gösteren bir tanılama paneli belirir."
     },
     "test": {
       "running": "Test ediliyor…",
@@ -411,6 +441,11 @@
       "noMatch": "Eşleşen etkinlik yok",
       "matched": "{count} etkinlik eşleşti"
     },
+    "overlay": {
+      "test": "Test",
+      "testHint": "Bu overlay'e sunucudan sahte bir hediye gönderir (OBS/sekmede açıksa efekt oynar).",
+      "testSent": "Ekran {screen}: {count} etkinlik eşleşti, overlay'e gönderildi"
+    },
     "editor": {
       "nameLabel": "Eylemin adı nedir?",
       "namePlaceholder": "ör. Abonelik Animasyonu",
@@ -434,6 +469,7 @@
       "newEvent": "Yeni Etkinlik",
       "editEvent": "Etkinliği Düzenle",
       "newTimer": "Yeni Zamanlayıcı",
+      "editTimer": "Zamanlayıcıyı Düzenle",
       "editTimer": "Zamanlayıcıyı Düzenle",
       "selectAtLeastOneType": "En az bir eylem tipi seçin"
     },
@@ -849,5 +885,33 @@
       "history": "Tarih",
       "testing": "Test Alanı"
     }
+  },
+  "pwa": {
+    "title": "{app} uygulamasını yükle",
+    "body": "Tek dokunuşla erişim ve tam ekran deneyim için {app} uygulamasını ana ekranına ekle.",
+    "install": "Yükle",
+    "later": "Şimdi değil",
+    "dismiss": "Kapat",
+    "iosTitle": "Ana Ekrana Ekle",
+    "iosBody": "Safari araç çubuğundaki Paylaş butonuna dokun, ardından açılan menüden “Ana Ekrana Ekle”yi seç.",
+    "installed": "Uygulama yüklendi!"
+  },
+  "debugPanel": {
+    "title": "Hata Ayıklama",
+    "minimize": "Küçült",
+    "expand": "Genişlet",
+    "overlaySync": "Overlay senkronu",
+    "syncOk": "senkron",
+    "syncError": "hata",
+    "syncIdle": "beklemede",
+    "simulate": "Simüle et",
+    "sendOverlay": "Overlay'e gönder",
+    "simulatedClient": "Simüle edildi · {count} kural eşleşti",
+    "sentOverlay": "Overlay'e gönderildi · {count} kural eşleşti",
+    "sentOverlayError": "Overlay'e gönderilemedi",
+    "lastDispatch": "Son dağıtım (simülatör)",
+    "matched": "{count} kural eşleşti",
+    "eventStream": "Canlı olay akışı",
+    "noEvents": "Henüz olay yok. Bağlan veya bir test butonuna bas."
   }
 }

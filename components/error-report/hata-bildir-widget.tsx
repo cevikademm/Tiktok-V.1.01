@@ -200,7 +200,8 @@ export function HataBildirWidget() {
     [screenshot, description, meta, severity],
   );
 
-  // WhatsApp ile gönder — DOĞRUDAN destek hattı sohbetini açar.
+  // Tek birleşik aksiyon: önce kaydı yazar (addErrorReport), sonra WhatsApp'tan
+  // gönderir. Paylaşım iptal edilse bile kayıt tutulur.
   const handleSend = useCallback(async () => {
     if (sending) return;
     if (!description.trim()) {
@@ -254,25 +255,6 @@ export function HataBildirWidget() {
       setSending(false);
     }
   }, [sending, description, screenshot, buildRecord, reset, show]);
-
-  // Yalnızca kaydet (WhatsApp açmadan)
-  const handleSaveOnly = useCallback(async () => {
-    if (sending) return;
-    if (!description.trim()) {
-      show("Lütfen hatayı kısaca açıklayın.", "info");
-      return;
-    }
-    setSending(true);
-    try {
-      addErrorReport(buildRecord(makeReportId(), new Date().toISOString()));
-      setOpen(false);
-      reset();
-      show("Hata bildirimi kaydedildi.", "success");
-    } catch {
-      show("Kaydedilemedi, tekrar deneyin.", "error");
-      setSending(false);
-    }
-  }, [sending, description, buildRecord, reset, show]);
 
   if (!isAdmin) return null;
 
@@ -670,25 +652,7 @@ export function HataBildirWidget() {
                   }}
                 >
                   {sending ? <span style={spinner(18)} /> : <WhatsAppGlyph size={20} />}
-                  {sending ? "Gönderiliyor…" : "WhatsApp ile Gönder"}
-                </button>
-                <button
-                  onClick={handleSaveOnly}
-                  disabled={sending}
-                  style={{
-                    width: "100%",
-                    marginTop: 9,
-                    padding: "11px",
-                    borderRadius: 13,
-                    cursor: sending ? "wait" : "pointer",
-                    background: T.surface2,
-                    color: T.text,
-                    border: `1px solid ${T.border}`,
-                    fontSize: 14,
-                    fontWeight: 600,
-                  }}
-                >
-                  Sadece Kaydet
+                  {sending ? "Kaydediliyor…" : "Kaydet ve WhatsApp'tan Gönder"}
                 </button>
                 <p
                   style={{

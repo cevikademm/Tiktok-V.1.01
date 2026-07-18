@@ -18,6 +18,8 @@ const TRIGGERS_FOR_EVENT: Record<LiveEvent["type"], TriggerType[]> = {
   emote: ["emote_specific"],
   envelope: [],
   roomUser: [],
+  // Zamanlayıcı olayları eşleştirmeden geçmez (fireAction doğrudan çalıştırır).
+  timer: [],
 };
 
 /** Rol filtresi — "Kim tetikleyebilir" (PRD §5.3). */

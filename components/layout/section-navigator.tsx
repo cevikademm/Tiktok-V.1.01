@@ -42,7 +42,7 @@ export function SectionNavigator({
       aria-label={t("common.onThisPage")}
       className={cn(
         "sticky top-4 hidden h-fit shrink-0 rounded-[var(--card-radius)]",
-        "border border-border-subtle bg-surface-1 p-3 2xl:block",
+        "border border-border-subtle bg-surface-1 p-3 xl:block",
         collapsed ? "w-12" : "w-56",
       )}
     >

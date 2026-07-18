@@ -8,6 +8,7 @@ import type { Action } from "@/lib/schemas/action";
 import type { StreamEvent } from "@/lib/schemas/event";
 import type { LiveEvent } from "@/lib/schemas/live";
 import { HEARTBEAT_TIMEOUT_MS } from "@/lib/engine/queue";
+import { ActionRenderer, type ResolvedAction } from "./action-player";
 
 /**
  * My Actions widget — PRD §5.4:
@@ -168,9 +169,24 @@ export function MyActionsWidget({
     return () => clearInterval(timer);
   }, [preview, backend]);
 
-  const action = playing?.action;
-  const text = action?.config.text
-    ? renderPlaceholders(action.config.text, { event: playing?.event ?? undefined })
+  const resolved: ResolvedAction | null = playing
+    ? {
+        actionId: playing.action.id,
+        queueId: playing.queueId,
+        durationSec: playing.action.durationSec,
+        types: playing.action.types,
+        text: playing.action.config.text
+          ? renderPlaceholders(playing.action.config.text, {
+              event: playing.event ?? undefined,
+            })
+          : undefined,
+        textColor: playing.action.config.textColor,
+        mediaUrl: playing.action.config.mediaUrl,
+        volume: playing.action.volume,
+        fadeInMs: playing.action.fadeInMs,
+        fadeOutMs: playing.action.fadeOutMs,
+        animationId: playing.action.config.animationId,
+      }
     : null;
 
   return (
@@ -181,48 +197,7 @@ export function MyActionsWidget({
         </div>
       )}
 
-      {action && (
-        <div
-          className="flex flex-col items-center gap-4 text-center transition-opacity"
-          style={{
-            opacity: fading === "in" ? 1 : 0,
-            transitionDuration: `${fading === "in" ? action.fadeInMs : action.fadeOutMs}ms`,
-          }}
-        >
-          {action.types.includes("showText") && text && (
-            <p
-              className="text-5xl font-bold drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]"
-              style={{ color: action.config.textColor ?? "#FFFFFF" }}
-            >
-              {text}
-            </p>
-          )}
-
-          {action.types.includes("showImage") && action.config.mediaUrl && (
-            // Widget'ta next/image kullanılmaz: kaynak blob/object URL olabilir ve
-            // OBS'de optimizasyon sunucusuna erişim garanti değil.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={action.config.mediaUrl}
-              alt=""
-              className="max-h-[60vh] max-w-[80vw] object-contain"
-            />
-          )}
-
-          {action.types.includes("playVideoFile") && action.config.mediaUrl && (
-            <video
-              src={action.config.mediaUrl}
-              autoPlay
-              muted={action.volume === 0}
-              className="max-h-[60vh] max-w-[80vw]"
-            />
-          )}
-
-          {action.types.includes("playAudio") && action.config.mediaUrl && (
-            <audio src={action.config.mediaUrl} autoPlay />
-          )}
-        </div>
-      )}
+      {resolved && <ActionRenderer action={resolved} fading={fading} />}
     </div>
   );
 }

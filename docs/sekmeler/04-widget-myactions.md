@@ -32,13 +32,15 @@ locale segmenti yoktur.
 | Şemalar | `lib/schemas/widget.ts`, `lib/schemas/action.ts` |
 
 **URL şeması** (PRD §5.4): `/widget/<widgetId>?cid=<channelId>&screen=1-8&preview=1`
+**Gerçek OBS köprüsü** (ADR-0002): `/widget/myactions?id=<overlayId>&screen=1-8`
 
 | Parametre | İşleniyor mu | Nerede |
 |---|---|---|
 | `widgetId` (path) | ✅ `widgetMeta(widgetId)` → yoksa `notFound()` | `app/widget/[widgetId]/page.tsx:22-23` |
-| `screen` | ✅ 1-8 aralığına klemplenir; geçersizse `1` | `page.tsx:38-42` |
-| `preview` | ✅ `"1"` ise debug rozeti + demo akışı | `page.tsx:25`, `myactions.tsx:163-169` |
-| `cid` | ❌ **okunmaz** (bkz. sınırlamalar) | — |
+| `screen` | ✅ 1-8 aralığına klemplenir; geçersizse `1` | `page.tsx:42-46` |
+| `preview` | ✅ `"1"` ise debug rozeti + demo akışı (yalnız `id` yokken) | `page.tsx:25`, `myactions.tsx:163-169` |
+| `id` (overlayId) | ✅ **varsa `RemoteOverlay`'e yönlenir** — sunucu-SSE köprüsü (ADR-0002) | `page.tsx:48-52` |
+| `cid` | ❌ okunmaz (ADR-0002'de `id` bunun yerini aldı) | — |
 
 **Uygulanmamış widget davranışı:** `meta.implemented === false` ise OBS'de siyah ekran
 yerine açık bir durum metni gösterilir: `"<widgetId>: not implemented yet"`
@@ -178,28 +180,66 @@ gerçekten oynatıldığını doğrulamaz.
 
 ---
 
+## Gerçek OBS köprüsü — sunucu-otoriteli SSE (Faz 1.5 · ADR-0002)
+
+URL'de `id=<overlayId>` verildiğinde `page.tsx` `MyActionsWidget` yerine
+**`RemoteOverlay`** (`components/widgets/remote-overlay.tsx`) render eder. Bu, gerçek OBS /
+TikTok LIVE Studio senaryosunu (ayrı süreç, BroadcastChannel erişilemez) çözer.
+
+**Akış:** TikTok → `wss://ws.eulerstream.com` (`lib/server/eulerstream.ts`, ref-count'lu tek
+upstream) → **`lib/server/overlay-hub.ts`** (bellek içi registry + SUNUCUDA `RuleEngine`) →
+eşleşen action `widgetInbound` "action" mesajı → **`/api/overlay/stream?id=&screen=`** (SSE) →
+`RemoteOverlay` (`EventSource`) → `ActionPlayer`.
+
+| Katman | Yol |
+|---|---|
+| Overlay istemci | `components/widgets/remote-overlay.tsx` (`EventSource`, `widgetInboundSchema.parse`) |
+| Paylaşılan oynatıcı + konfeti | `components/widgets/action-player.tsx` (`ActionRenderer` + `useActionPlayer`) |
+| SSE kanalı | `app/api/overlay/stream/route.ts` (GET, `subscribe(id, screen, send)`) |
+| Config sync | `app/api/overlay/register/route.ts` (POST) ← `lib/overlay/use-overlay-sync.ts` (AppProvider) |
+| Test enjeksiyonu | `app/api/overlay/simulate/route.ts` (POST — gerçek hediye olmadan) |
+| Sunucu hub | `lib/server/overlay-hub.ts` (registry, engine, fan-out, `.data/overlays.json` persist) |
+| Overlay kimliği | `lib/overlay/identity.ts` + `lib/overlay/use-overlay-id.ts` (localStorage UUID) |
+
+**Konfeti:** `action-player.tsx` `showAnimation` tipini `canvas-confetti` ile render eder
+(`animationId ∈ {confetti, hearts, fireworks}`, `prefers-reduced-motion` saygılı).
+
+**Kablo protokolü:** `widgetInboundSchema` "action" payload'ına `animationId` eklendi
+(`lib/schemas/widget.ts`, ADR-0002). Config sync `actions`/`events`/`username`/`screens`
+değiştikçe (debounced) `/api/overlay/register`'a POST edilir → sunucu motorunun kopyası güncel
+kalır, overlay **dashboard kapalıyken** de çalışır.
+
+**Sınır:** Bellek içi hub + uzun SSE + upstream WS yalnız **tek uzun-ömürlü Node sürecinde**
+(`next start` VPS / yerel) çalışır; Vercel çok-instance/serverless'te değil. Auth henüz yok —
+`overlayId` tahmin-edilemez UUID token ile korunur. Çok-instance ölçek ve auth **Faz 2**
+(Supabase Auth + Realtime; ADR-0002 "Faz 2 yükseltme yolu").
+
+**Doğrulama:** panelde kural kur → Overlay Screens'te `id`'li linki kopyala → ikinci pencerede/OBS'te aç →
+"Test" düğmesi (veya `POST /api/overlay/simulate`) → konfeti + ses. Birim: `tests/overlay-hub.test.ts`.
+
+---
+
 ## Bilinen sınırlamalar
 
-1. **`cid` parametresi tümüyle yok sayılır.** PRD §5.4/§6.3 `cid` bazlı oda modeli öngörür;
-   `page.tsx` bu parametreyi okumaz ve `MyActionsWidget`'a geçirmez. Widget hangi kanalı
-   render edeceğini bilmez — her zaman yerel mock backend'i kullanır. **Faz 2'nin ön koşulu.**
-2. **OBS'te çalışmaz (mimari sınır).** Widget `backend.bus`'a abone olur; bu bus
-   `createBus()` ile üretilen **in-memory** bir `Set`'tir (`lib/data/mock/index.ts:326-337`)
-   ve yalnız aynı JS bağlamında yaşar. OBS ayrı bir süreçte ayrı bir sayfa açacağı için
-   uygulamadaki Event Simulator'dan **hiçbir olay alamaz**. Faz 1'de widget yalnız aynı
-   sekmede (veya `preview=1` demo akışıyla) anlamlıdır. Gerçek WS gateway **Faz 2** (PRD §6.3).
-3. **Widget kendi motor örneğini kurar.** `new RuleEngine(...)` (`myactions.tsx:95`) —
-   uygulama sayfasındaki `getEngine()` singleton'ından (`lib/engine/singleton.ts`) **ayrıdır**.
-   İki motor kuyruk paylaşmaz; Overlay Screens tablosundaki "kuyruk" ile widget'ın kuyruğu
-   farklı nesnelerdir. Faz 2'de tek otorite (sunucu) olmalıdır.
+> **Not (ADR-0002):** Aşağıdaki 1-3, 5 ve 7. maddeler, URL'de `id=<overlayId>` verilen
+> **gerçek OBS köprüsü yolu için ÇÖZÜLDÜ** (yukarıdaki bölüm). Sınırlamalar, `id`'siz eski
+> bus-temelli demo/önizleme yolu (`MyActionsWidget`) için geçerlidir.
+
+1. **`cid` parametresi tümüyle yok sayılır** (eski yol). Gerçek köprüde yerini `id=<overlayId>`
+   aldı (ADR-0002); `id`'siz yolda `page.tsx` hâlâ `cid`'yi okumaz.
+2. **`id`'siz yol OBS'te çalışmaz (mimari sınır).** `MyActionsWidget` `backend.bus`'a
+   (in-memory `BroadcastChannel`, `lib/data/mock/index.ts`) abone olur; ayrı süreç olan OBS
+   olay alamaz. ✅ **Çözüm:** `id`'li URL → `RemoteOverlay` sunucu-SSE kanalına bağlanır.
+3. **`id`'siz widget kendi motor örneğini kurar** (`myactions.tsx:95`), uygulama singleton'ından
+   ayrıdır. ✅ **Çözüm:** gerçek köprüde tek otorite **sunucu hub'ıdır** (`overlay-hub.ts`); overlay
+   yalnız render eder.
 4. **`widgetSettings` uygulanmaz.** `widgetSettingsSchema` (35 font, renkler, filtreler,
    ses seviyesi…) tanımlı ve `WidgetRepo.getSettings/saveSettings` portu mevcut, ancak
    `MyActionsWidget` **hiçbirini okumaz** — metin `text-5xl` sabit, renk yalnız
-   `config.textColor`'dan gelir (`myactions.tsx:192-199`). PRD §5.4'ün "canlı ayar push'u"
-   Faz 4.
-5. **Yalnız 4 eylem tipi render edilir:** `showText`, `showImage`, `playVideoFile`,
-   `playAudio` (`myactions.tsx:192-223`). `showAnimation` dâhil diğer 17 tip **çizilmez**
-   (Lottie/animasyon altyapısı Faz 4).
+   `config.textColor`'dan gelir. PRD §5.4'ün "canlı ayar push'u" Faz 4.
+5. **`showAnimation` artık render edilir (köprü yolu).** `ActionRenderer` konfeti/hearts/fireworks
+   çizer (`canvas-confetti`). ✅ Diğer tipler (`showText`, `showImage`, `playVideoFile`,
+   `playAudio`) hem eski hem yeni yolda render edilir; kalan 16 tip (TTS/OBS/webhook…) hâlâ çizilmez.
 6. **Medya blob URL'lerine bağlı.** Eylem editörü dosyaları `URL.createObjectURL()` ile
    saklar (`action-editor.tsx:93`); bu URL'ler **sayfa/süreç ömrüne bağlıdır**. Widget ayrı
    bir sekmede veya yenilemeden sonra açıldığında görsel/video/ses **yüklenmez**. Kalıcı

@@ -20,6 +20,9 @@
 # production
 /build
 
+# overlay hub kalıcılığı (runtime, ADR-0002)
+/.data/
+
 # misc
 .DS_Store
 *.pem

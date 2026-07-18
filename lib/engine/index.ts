@@ -126,6 +126,42 @@ export class RuleEngine {
     return { duplicate: false, matchedRules: rules, outcomes };
   }
 
+  /**
+   * Bir eylemi etkinlik/tetikleyici eşleştirmesi OLMADAN doğrudan çalıştırır —
+   * Zamanlayıcı (Timer) kaynaklı çalıştırma (PRD §6.2 "Timer olayları"). Timer,
+   * eylemi doğrudan `actionId` ile adlar; kullanıcı bağlamı yoktur:
+   *   - kullanıcı/genel cooldown UYGULANMAZ (aralığın kendisi hız sınırıdır),
+   *   - dedup UYGULANMAZ (her atış kasıtlıdır).
+   * Kuyruk kapasitesi / offline ekran / geçersiz ekran reddi korunur — böylece
+   * çağıran taraf mevcut "queued → teslim et → auto-dequeue" döngüsünü yeniden kullanır.
+   */
+  fireAction(actionId: string, ev: LiveEvent): DispatchResult {
+    const action = this.deps.getActions().find((a) => a.id === actionId);
+    if (!action) return { duplicate: false, matchedRules: [], outcomes: [] };
+
+    if (!action.enabled) {
+      return { duplicate: false, matchedRules: [], outcomes: [{ status: "disabled", action }] };
+    }
+
+    const res = this.queues.enqueue(
+      {
+        actionId: action.id,
+        userId: ev.user.userId,
+        durationSec: action.durationSec,
+        skipOnNextAction: action.skipOnNextAction,
+      },
+      action.screen,
+      this.now(),
+      { requireOnline: this.deps.requireOnlineScreen },
+    );
+
+    const outcome: DispatchOutcome = res.ok
+      ? { status: "queued", action, item: res.item }
+      : { status: "rejected", action, reason: res.reason };
+
+    return { duplicate: false, matchedRules: [], outcomes: [outcome] };
+  }
+
   reset(): void {
     this.queues.clear();
     this.cooldowns.reset();

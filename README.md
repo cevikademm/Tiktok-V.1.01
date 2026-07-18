@@ -120,3 +120,26 @@ dakikalarca askıda kalır. Self-host derlemeyi ağdan bağımsız ve determinis
 Marka adı `NEXT_PUBLIC_APP_NAME` ile parametriktir (varsayılan "LiveKit").
 TikFinity logo/varlıkları kopyalanmaz; eşdeğer özgün varlıklar üretilir (CLAUDE.md §8).
 Ticari kopya riskleri için `hukuk-uyum-danismani` raporu Faz 7 öncesi zorunludur.
+
+## Auth Kurulumu (Supabase Dashboard)
+
+Kod tarafı hazır (e-posta onaylı giriş + Google OAuth + sert kapı). Aşağıdaki panel
+adımları **Supabase Dashboard'da bir kez** yapılır (bağlı proje MCP dışı olduğu için elle):
+
+1. **profiles tablosu** — SQL Editor → `supabase/migrations/0001_auth_profiles.sql` yapıştır → Run.
+2. **E-posta onayı** — Authentication → Sign In / Providers → Email:
+   - "Enable Email provider" açık, **"Confirm email" AÇIK** (onaylı giriş için).
+3. **Google OAuth** — Authentication → Sign In / Providers → Google → Enable:
+   - Google Cloud Console → APIs & Services → Credentials → OAuth Client ID (Web).
+   - Authorized redirect URI: `https://<ref>.supabase.co/auth/v1/callback`
+   - Alınan **Client ID** ve **Client Secret**'ı Supabase Google provider ekranına yapıştır.
+4. **URL Configuration** — Authentication → URL Configuration:
+   - **Site URL:** `http://localhost:3000` (üretimde gerçek alan adı).
+   - **Redirect URLs** (Add URL): `http://localhost:3000/**` ve üretim alan adı için
+     `https://<alan-adi>/**`. (Uygulama callback'i `/auth/callback` yolunu kullanır.)
+5. **E-posta şablonu (opsiyonel)** — varsayılan şablon `?code=` ile `/auth/callback`'e
+   döner (desteklenir). `{{ .TokenHash }}` kullanan özel şablon `/auth/confirm`'e döner
+   (o da desteklenir) — ikisi de çalışır.
+
+Env değişkenleri (`.env.local`): `NEXT_PUBLIC_SUPABASE_URL` ve
+`NEXT_PUBLIC_SUPABASE_ANON_KEY` yeterlidir (Auth bunları kullanır).

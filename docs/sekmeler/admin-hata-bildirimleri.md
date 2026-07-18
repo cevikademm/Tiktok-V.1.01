@@ -83,9 +83,25 @@ i18n etiketi `nav.errorReports` (4 dilde).
 
 ---
 
+## Görünümler (Liste / Galeri)
+
+Panel iki görünüm sunar (sağ üstteki segment kontrolü):
+- **🗂 Liste** — her kayıt için detay kartı (ekran görüntüsü + açıklama + meta + durum
+  aksiyonları + WhatsApp/Sayfaya Git/Sil).
+- **🖼 Galeri** — "hata alınan ekran görüntülerinin listelendiği ek alan": yalnızca
+  ekran görüntüsü olan kayıtlar yoğun bir küçük-resim ızgarasında; her thumbnail'de
+  durum rozeti (sol üst) + önem/tarih (alt), tıklayınca tam ekran büyütme (zoom).
+  Aktif filtreye (Tümü/Yeni/İnceleniyor/Çözüldü) saygılıdır. Bkz.
+  `components/error-report/hata-bildirimleri-panel.tsx` (`view === "gallery"`).
+
 ## State yönetimi
 
 - Kalıcılık: mevcut mock store (`useSyncExternalStore` → `useMockStore`), ayrı depo açılmadı.
+- **Supabase yedeği (ADR-0004):** Supabase yapılandırıldıysa (NEXT_PUBLIC_* env) kayıtlar
+  `error_reports` tablosuna **sürekli** yedeklenir. Anlık: her mutasyon (`store.ts` →
+  `POST/DELETE /api/error-reports`, service-role). Mount catch-up: `<ErrorReportBackup>`
+  yedekte olmayan eski kayıtları upsert eder. Yerel store her zaman kaynak; yedek best-effort,
+  Supabase kapalıyken tamamen pasif. Kurulum: `supabase/schema.sql`.
 - Ekran görüntüsü: `html2canvas-pro` (viewport yakalama, 2–2.5x supersampling, JPEG q0.7).
   **Not:** orijinal `html2canvas@1.4.1`, Tailwind v4'ün `oklch()/oklab()/color-mix()`
   renklerinde "unsupported color function" atıp yakalamayı bozuyordu; bakımlı fork
@@ -143,3 +159,4 @@ panel liste/rozet/zoom, durum→resolved + resolvedAt. Ayrıntı: aşağıdaki "
 | 2026-07-16 | Modül eklendi: FAB + modal + admin paneli, mock store kalıcılığı, admin-gated nav. `html2canvas-pro` (Tailwind v4 oklch uyumu). |
 | 2026-07-17 | **Fix:** eski localStorage'da `errorReports` tanımsızken `IconRail` kabuğu çökmesi (`?? []` guard). Görünürlük varsayılan **GÖRÜNÜR** yapıldı (opt-out `'0'`). |
 | 2026-07-17 | **Feat:** ekran görüntüsü artık **Web Share API** ile mesaja dosya olarak eklenir (`shareReportWithScreenshot`); wa.me yedek yola düşürüldü. |
+| 2026-07-17 | **Feat:** panele **🖼 Galeri** görünümü eklendi — ekran görüntülerinin yoğun ızgara listesi (filtreye saygılı, tıkla-büyüt). |

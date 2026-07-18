@@ -148,6 +148,8 @@ export const widgetInboundSchema = z.discriminatedUnion("kind", [
       volume: z.number().optional(),
       fadeInMs: z.number().optional(),
       fadeOutMs: z.number().optional(),
+      /** showAnimation — confetti/hearts/fireworks (ADR-0002). */
+      animationId: z.string().optional(),
     }),
   }),
   z.object({ kind: z.literal("widgetSettings"), payload: widgetSettingsSchema }),

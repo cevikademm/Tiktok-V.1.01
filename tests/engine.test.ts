@@ -6,7 +6,7 @@ import { renderPlaceholders } from "@/lib/engine/placeholders";
 import { ScreenQueues } from "@/lib/engine/queue";
 import { actionDraftSchema, type Action } from "@/lib/schemas/action";
 import { eventSignature, type StreamEvent } from "@/lib/schemas/event";
-import type { LiveEvent, LiveUser } from "@/lib/schemas/live";
+import { systemLiveEvent, type LiveEvent, type LiveUser } from "@/lib/schemas/live";
 import { levelForPoints, levelTable } from "@/lib/schemas/points";
 
 /* ------------------------------------------------------------------ fixtures */
@@ -357,6 +357,62 @@ describe("RuleEngine — uçtan uca sevk (PRD §6.1)", () => {
 
     expect(e.queues.length(5)).toBe(1);
     expect(e.queues.length(1)).toBe(0);
+  });
+});
+
+/* ----------------------------------------------------------------- fireAction */
+
+describe("RuleEngine.fireAction — Zamanlayıcı çalıştırma (ADR-0005)", () => {
+  const ev = systemLiveEvent({ id: "sys1", ts: 1000 });
+
+  function engine(actions: Action[], opts = {}) {
+    return new RuleEngine({
+      getActions: () => actions,
+      getEvents: () => [],
+      now: () => 1000,
+      ...opts,
+    });
+  }
+
+  it("eylemi eşleştirmesiz doğrudan kendi ekranının kuyruğuna alır", () => {
+    const e = engine([action({ id: "a1", screen: 3 })]);
+    const res = e.fireAction("a1", ev);
+
+    expect(res.matchedRules).toHaveLength(0);
+    expect(res.outcomes[0].status).toBe("queued");
+    expect(e.queues.length(3)).toBe(1);
+  });
+
+  it("bilinmeyen actionId → boş sonuç", () => {
+    const e = engine([action({ id: "a1" })]);
+    expect(e.fireAction("yok", ev).outcomes).toHaveLength(0);
+  });
+
+  it("devre dışı eylem kuyruğa girmez", () => {
+    const e = engine([action({ id: "a1", enabled: false })]);
+    const res = e.fireAction("a1", ev);
+
+    expect(res.outcomes[0].status).toBe("disabled");
+    expect(e.queues.length(1)).toBe(0);
+  });
+
+  it("kuyruk dolunca 'rejected' döner (queueFull)", () => {
+    const e = new RuleEngine(
+      { getActions: () => [action({ id: "a1" })], getEvents: () => [], now: () => 1000 },
+      [{ screen: 1, maxQueueLength: 1 }],
+    );
+    e.fireAction("a1", ev);
+    const second = e.fireAction("a1", ev);
+
+    expect(second.outcomes[0].status).toBe("rejected");
+    expect(second.outcomes[0].status === "rejected" && second.outcomes[0].reason).toBe("queueFull");
+  });
+
+  it("global cooldown BYPASS — art arda atışlar engellenmez", () => {
+    const e = engine([action({ id: "a1", globalCooldownSec: 999 })]);
+    e.fireAction("a1", ev);
+    e.fireAction("a1", ev);
+    expect(e.queues.length(1)).toBe(2);
   });
 });
 

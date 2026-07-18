@@ -11,9 +11,11 @@ import {
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { SignOutButton } from "@/components/modules/auth/sign-out-button";
 import { useApp } from "@/components/providers/app-provider";
 import { Button } from "@/components/ui/button";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
+import { useUser } from "@/lib/supabase/use-user";
 import { locales, type Locale } from "@/lib/i18n/routing";
 import { SECTION_COUNTS, moduleForPath } from "@/lib/nav";
 import { APP_NAME, cn } from "@/lib/utils";
@@ -81,6 +83,7 @@ export function Topbar() {
   const pathname = usePathname();
   const router = useRouter();
   const { connection, connect, disconnect, backend } = useApp();
+  const { user } = useUser();
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [inbox, setInbox] = useState(false);
@@ -336,7 +339,9 @@ export function Topbar() {
               👤
             </span>
             <span className="hidden flex-col items-start leading-tight md:flex">
-              <span className="text-xs text-white">{t("topbar.accountGuest")}</span>
+              <span className="max-w-[9rem] truncate text-xs text-white">
+                {user?.email ?? t("topbar.accountGuest")}
+              </span>
               <span
                 className="text-[10px]"
                 style={{ color: isLive ? undefined : "var(--accent)" }}
@@ -379,6 +384,19 @@ export function Topbar() {
                   </button>
                 ))}
               </div>
+
+              {/* Çıkış — yalnız girişli kullanıcı için (sert kapı gereği hep girişli). */}
+              {user && (
+                <div className="mt-2 border-t border-border-subtle pt-2">
+                  <SignOutButton
+                    variant="ghost"
+                    size="sm"
+                    withIcon
+                    className="w-full justify-start"
+                    onDone={() => setAccount(false)}
+                  />
+                </div>
+              )}
             </div>
           </Dropdown>
         </div>

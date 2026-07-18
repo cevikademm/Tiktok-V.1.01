@@ -108,6 +108,8 @@
     "unsavedTitle": "¿Guardar los cambios?",
     "unsavedBody": "Tienes cambios sin guardar.",
     "onThisPage": "En esta página",
+    "hideMenu": "Ocultar menú",
+    "showMenu": "Mostrar menú",
     "pro": "PRO",
     "new": "nuevo"
   },
@@ -127,11 +129,38 @@
   "auth": {
     "gateTitle": "Inicia sesión o crea una cuenta gratis para continuar. (¡Obligatorio!)",
     "signInEmail": "Inicia sesión o regístrate con tu correo",
-    "signInGoogle": "Inicia sesión o regístrate con Google",
+    "signInGoogle": "Continuar con Google",
+    "signInTitle": "Inicia sesión en {app}",
+    "signUpTitle": "Crea tu cuenta de {app}",
+    "emailLabel": "Correo electrónico",
+    "passwordLabel": "Contraseña",
+    "passwordHint": "Al menos 6 caracteres.",
+    "or": "o",
+    "signInSubmit": "Iniciar sesión",
+    "signUpSubmit": "Crear cuenta",
+    "submitting": "Enviando…",
+    "noAccount": "¿No tienes una cuenta?",
+    "haveAccount": "¿Ya tienes una cuenta?",
+    "switchToSignUp": "Regístrate",
+    "switchToSignIn": "Iniciar sesión",
+    "checkEmailTitle": "Revisa tu correo",
+    "checkEmailBody": "Te enviamos un enlace para confirmar tu cuenta. Haz clic en el enlace del correo para completar el inicio de sesión.",
+    "backToSignIn": "Volver a iniciar sesión",
     "legalNote": "Al continuar aceptas nuestros {tos} y nuestra {privacy}.",
     "tos": "Términos del servicio",
     "privacy": "Política de privacidad",
-    "signOut": "Cerrar sesión"
+    "signOut": "Cerrar sesión",
+    "errors": {
+      "email": "Introduce un correo electrónico válido.",
+      "passwordMin": "La contraseña debe tener al menos 6 caracteres.",
+      "passwordMax": "La contraseña puede tener como máximo 72 caracteres.",
+      "invalidCredentials": "Correo o contraseña incorrectos.",
+      "emailNotConfirmed": "Tu correo aún no está confirmado. Revisa tu bandeja de entrada.",
+      "userExists": "Ya existe una cuenta con este correo. Inicia sesión.",
+      "rateLimited": "Demasiados intentos. Inténtalo de nuevo en un momento.",
+      "generic": "Algo salió mal. Inténtalo de nuevo.",
+      "callback": "No se pudo completar el inicio de sesión. Inténtalo de nuevo."
+    }
   },
   "start": {
     "title": "Inicio",
@@ -340,7 +369,8 @@
     },
     "debug": {
       "enable": "Activar modo de depuración",
-      "openTiktok": "Abrir TikTok LIVE"
+      "openTiktok": "Abrir TikTok LIVE",
+      "hint": "Cuando se activa, aparece un panel de diagnóstico abajo a la derecha con el flujo de eventos en vivo y el estado del overlay."
     },
     "test": {
       "running": "Probando…",
@@ -411,6 +441,11 @@
       "noMatch": "Ningún evento coincide",
       "matched": "{count} eventos coincidieron"
     },
+    "overlay": {
+      "test": "Probar",
+      "testHint": "Envía un regalo de prueba desde el servidor a este overlay (el efecto se reproduce si está abierto en OBS/una pestaña).",
+      "testSent": "Pantalla {screen}: {count} eventos coincidieron, enviado al overlay"
+    },
     "editor": {
       "nameLabel": "¿Cómo se llama la acción?",
       "namePlaceholder": "p. ej. Animación de suscripción",
@@ -434,6 +469,7 @@
       "newEvent": "Evento nuevo",
       "editEvent": "Editar evento",
       "newTimer": "Temporizador nuevo",
+      "editTimer": "Editar temporizador",
       "editTimer": "Editar temporizador",
       "selectAtLeastOneType": "Selecciona al menos un tipo de acción"
     },
@@ -849,5 +885,33 @@
       "history": "Historial",
       "testing": "Área de Pruebas"
     }
+  },
+  "pwa": {
+    "title": "Instalar {app}",
+    "body": "Añade {app} a tu pantalla de inicio para acceder con un toque y disfrutar de una experiencia a pantalla completa.",
+    "install": "Instalar",
+    "later": "Ahora no",
+    "dismiss": "Cerrar",
+    "iosTitle": "Añadir a pantalla de inicio",
+    "iosBody": "Toca el botón Compartir en la barra de Safari y luego elige «Añadir a pantalla de inicio».",
+    "installed": "¡App instalada!"
+  },
+  "debugPanel": {
+    "title": "Depuración",
+    "minimize": "Minimizar",
+    "expand": "Expandir",
+    "overlaySync": "Sync del overlay",
+    "syncOk": "sincronizado",
+    "syncError": "error",
+    "syncIdle": "inactivo",
+    "simulate": "Simular",
+    "sendOverlay": "Enviar al overlay",
+    "simulatedClient": "Simulado · {count} reglas coincidieron",
+    "sentOverlay": "Enviado al overlay · {count} reglas coincidieron",
+    "sentOverlayError": "No se pudo enviar al overlay",
+    "lastDispatch": "Último dispatch (simulador)",
+    "matched": "{count} reglas coincidieron",
+    "eventStream": "Flujo de eventos en vivo",
+    "noEvents": "Aún no hay eventos. Conéctate o pulsa un botón de prueba."
   }
 }

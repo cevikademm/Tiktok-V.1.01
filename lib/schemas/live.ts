@@ -16,6 +16,7 @@ export const liveEventTypeSchema = z.enum([
   "emote",
   "envelope",
   "roomUser",
+  "timer", // kullanıcısız/sistem kaynağı — Zamanlayıcı (PRD §6.2 "Timer olayları")
 ]);
 export type LiveEventType = z.infer<typeof liveEventTypeSchema>;
 
@@ -65,6 +66,37 @@ export const liveEventSchema = z.object({
   isFirstActivity: z.boolean().optional(),
 });
 export type LiveEvent = z.infer<typeof liveEventSchema>;
+
+/** Boş/sistem izleyici — kullanıcısı olmayan olaylar (Zamanlayıcı) için. */
+const SYSTEM_USER: LiveUser = {
+  uniqueId: "",
+  nickname: "",
+  userId: "",
+  isFollower: false,
+  isSubscriber: false,
+  isModerator: false,
+  teamMemberLevel: 0,
+};
+
+/**
+ * Kullanıcısız bir "sistem" olayı üretir — Zamanlayıcı gibi tetikleyicisiz
+ * kaynaklar için. Eşleştirmeden geçmez (RuleEngine.fireAction doğrudan çalıştırır);
+ * yalnız placeholder render'ı için LiveEvent şekline ihtiyaç vardır. `{username}`
+ * gibi kullanıcı placeholder'ları boş çözülür.
+ *
+ * `id`/`ts` testlerde belirlenebilir olması için dışarıdan verilebilir.
+ */
+export function systemLiveEvent(
+  overrides?: Partial<Pick<LiveEvent, "id" | "ts">>,
+): LiveEvent {
+  const ts = overrides?.ts ?? Date.now();
+  return {
+    id: overrides?.id ?? `sys_${ts}_${Math.floor(Math.random() * 1_000_000)}`,
+    type: "timer",
+    ts,
+    user: { ...SYSTEM_USER },
+  };
+}
 
 /**
  * Placeholder değişkenleri — PRD §5.3 (birebir).

@@ -108,6 +108,8 @@
     "unsavedTitle": "Änderungen speichern?",
     "unsavedBody": "Du hast ungespeicherte Änderungen.",
     "onThisPage": "Auf dieser Seite",
+    "hideMenu": "Menü ausblenden",
+    "showMenu": "Menü einblenden",
     "pro": "PRO",
     "new": "neu"
   },
@@ -127,11 +129,38 @@
   "auth": {
     "gateTitle": "Bitte melde dich an oder erstelle ein kostenloses Konto, um fortzufahren. (Erforderlich!)",
     "signInEmail": "Mit E-Mail anmelden oder registrieren",
-    "signInGoogle": "Mit Google anmelden oder registrieren",
+    "signInGoogle": "Mit Google fortfahren",
+    "signInTitle": "Bei {app} anmelden",
+    "signUpTitle": "{app}-Konto erstellen",
+    "emailLabel": "E-Mail",
+    "passwordLabel": "Passwort",
+    "passwordHint": "Mindestens 6 Zeichen.",
+    "or": "oder",
+    "signInSubmit": "Anmelden",
+    "signUpSubmit": "Konto erstellen",
+    "submitting": "Wird gesendet…",
+    "noAccount": "Noch kein Konto?",
+    "haveAccount": "Schon ein Konto?",
+    "switchToSignUp": "Registrieren",
+    "switchToSignIn": "Anmelden",
+    "checkEmailTitle": "Prüfe deine E-Mails",
+    "checkEmailBody": "Wir haben dir einen Link zur Bestätigung deines Kontos gesendet. Klicke auf den Link in der E-Mail, um die Anmeldung abzuschließen.",
+    "backToSignIn": "Zurück zur Anmeldung",
     "legalNote": "Wenn du fortfährst, stimmst du unseren {tos} und unserer {privacy} zu.",
     "tos": "Nutzungsbedingungen",
     "privacy": "Datenschutzerklärung",
-    "signOut": "Abmelden"
+    "signOut": "Abmelden",
+    "errors": {
+      "email": "Gib eine gültige E-Mail-Adresse ein.",
+      "passwordMin": "Das Passwort muss mindestens 6 Zeichen lang sein.",
+      "passwordMax": "Das Passwort darf höchstens 72 Zeichen lang sein.",
+      "invalidCredentials": "E-Mail oder Passwort ist falsch.",
+      "emailNotConfirmed": "Deine E-Mail ist noch nicht bestätigt. Prüfe dein Postfach.",
+      "userExists": "Mit dieser E-Mail existiert bereits ein Konto. Bitte melde dich an.",
+      "rateLimited": "Zu viele Versuche. Bitte versuche es später erneut.",
+      "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+      "callback": "Anmeldung konnte nicht abgeschlossen werden. Bitte versuche es erneut."
+    }
   },
   "start": {
     "title": "Start",
@@ -340,7 +369,8 @@
     },
     "debug": {
       "enable": "Debug-Modus aktivieren",
-      "openTiktok": "TikTok LIVE öffnen"
+      "openTiktok": "TikTok LIVE öffnen",
+      "hint": "Wenn aktiviert, erscheint unten rechts ein Diagnose-Panel mit dem Live-Event-Stream und Overlay-Status."
     },
     "test": {
       "running": "Teste…",
@@ -411,6 +441,11 @@
       "noMatch": "Kein passendes Event",
       "matched": "{count} Events getroffen"
     },
+    "overlay": {
+      "test": "Test",
+      "testHint": "Sendet ein Test-Geschenk vom Server an dieses Overlay (Effekt läuft, wenn es in OBS/einem Tab offen ist).",
+      "testSent": "Bildschirm {screen}: {count} Events getroffen, an Overlay gesendet"
+    },
     "editor": {
       "nameLabel": "Wie lautet der Name der Aktion?",
       "namePlaceholder": "z. B. Abo-Animation",
@@ -434,6 +469,7 @@
       "newEvent": "Neues Event",
       "editEvent": "Event bearbeiten",
       "newTimer": "Neuer Timer",
+      "editTimer": "Timer bearbeiten",
       "editTimer": "Timer bearbeiten",
       "selectAtLeastOneType": "Wähle mindestens einen Aktionstyp"
     },
@@ -849,5 +885,33 @@
       "history": "Verlauf",
       "testing": "Testbereich"
     }
+  },
+  "pwa": {
+    "title": "{app} installieren",
+    "body": "Füge {app} zu deinem Startbildschirm hinzu — für Zugriff mit einem Tipp und ein Vollbild-Erlebnis.",
+    "install": "Installieren",
+    "later": "Jetzt nicht",
+    "dismiss": "Schließen",
+    "iosTitle": "Zum Startbildschirm hinzufügen",
+    "iosBody": "Tippe in der Safari-Symbolleiste auf die Teilen-Schaltfläche und wähle dann „Zum Home-Bildschirm“.",
+    "installed": "App installiert!"
+  },
+  "debugPanel": {
+    "title": "Debug",
+    "minimize": "Minimieren",
+    "expand": "Erweitern",
+    "overlaySync": "Overlay-Sync",
+    "syncOk": "synchron",
+    "syncError": "Fehler",
+    "syncIdle": "inaktiv",
+    "simulate": "Simulieren",
+    "sendOverlay": "An Overlay senden",
+    "simulatedClient": "Simuliert · {count} Regeln getroffen",
+    "sentOverlay": "An Overlay gesendet · {count} Regeln getroffen",
+    "sentOverlayError": "Senden an Overlay fehlgeschlagen",
+    "lastDispatch": "Letzter Dispatch (Simulator)",
+    "matched": "{count} Regeln getroffen",
+    "eventStream": "Live-Event-Stream",
+    "noEvents": "Noch keine Events. Verbinde dich oder drücke einen Test-Button."
   }
 }

@@ -108,6 +108,8 @@
     "unsavedTitle": "Save changes?",
     "unsavedBody": "You have unsaved changes.",
     "onThisPage": "On this page",
+    "hideMenu": "Hide menu",
+    "showMenu": "Show menu",
     "pro": "PRO",
     "new": "new"
   },
@@ -127,11 +129,38 @@
   "auth": {
     "gateTitle": "Please sign in or create a free account to continue. (Required!)",
     "signInEmail": "Sign in or sign up with email",
-    "signInGoogle": "Sign in or sign up with Google",
+    "signInGoogle": "Continue with Google",
+    "signInTitle": "Sign in to {app}",
+    "signUpTitle": "Create your {app} account",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "passwordHint": "At least 6 characters.",
+    "or": "or",
+    "signInSubmit": "Sign in",
+    "signUpSubmit": "Create account",
+    "submitting": "Submitting…",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "switchToSignUp": "Sign up",
+    "switchToSignIn": "Sign in",
+    "checkEmailTitle": "Check your email",
+    "checkEmailBody": "We sent you a link to confirm your account. Click the link in the email to finish signing in.",
+    "backToSignIn": "Back to sign in",
     "legalNote": "By continuing you agree to our {tos} and {privacy}.",
     "tos": "Terms of Service",
     "privacy": "Privacy Policy",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "errors": {
+      "email": "Enter a valid email address.",
+      "passwordMin": "Password must be at least 6 characters.",
+      "passwordMax": "Password can be at most 72 characters.",
+      "invalidCredentials": "Incorrect email or password.",
+      "emailNotConfirmed": "Your email isn't confirmed yet. Check your inbox.",
+      "userExists": "An account with this email already exists. Sign in instead.",
+      "rateLimited": "Too many attempts. Please try again shortly.",
+      "generic": "Something went wrong. Please try again.",
+      "callback": "Sign-in couldn't be completed. Please try again."
+    }
   },
   "start": {
     "title": "Start",
@@ -340,7 +369,8 @@
     },
     "debug": {
       "enable": "Enable Debug Mode",
-      "openTiktok": "Open TikTok LIVE"
+      "openTiktok": "Open TikTok LIVE",
+      "hint": "When enabled, a diagnostics panel appears at the bottom-right showing the live event stream and overlay status."
     },
     "test": {
       "running": "Testing…",
@@ -411,6 +441,11 @@
       "noMatch": "No matching event",
       "matched": "{count} events matched"
     },
+    "overlay": {
+      "test": "Test",
+      "testHint": "Sends a fake gift from the server to this overlay (effect plays if it's open in OBS/a tab).",
+      "testSent": "Screen {screen}: {count} events matched, sent to overlay"
+    },
     "editor": {
       "nameLabel": "What is the name of the action?",
       "namePlaceholder": "e.g. Subscription Animation",
@@ -434,6 +469,7 @@
       "newEvent": "New Event",
       "editEvent": "Edit Event",
       "newTimer": "New Timer",
+      "editTimer": "Edit Timer",
       "editTimer": "Edit Timer",
       "selectAtLeastOneType": "Select at least one action type"
     },
@@ -849,5 +885,33 @@
       "history": "History",
       "testing": "Testing Area"
     }
+  },
+  "pwa": {
+    "title": "Install {app}",
+    "body": "Add {app} to your home screen for one-tap access and a full-screen experience.",
+    "install": "Install",
+    "later": "Not now",
+    "dismiss": "Dismiss",
+    "iosTitle": "Add to Home Screen",
+    "iosBody": "Tap the Share button in the Safari toolbar, then choose “Add to Home Screen” from the menu.",
+    "installed": "App installed!"
+  },
+  "debugPanel": {
+    "title": "Debug",
+    "minimize": "Minimize",
+    "expand": "Expand",
+    "overlaySync": "Overlay sync",
+    "syncOk": "synced",
+    "syncError": "error",
+    "syncIdle": "idle",
+    "simulate": "Simulate",
+    "sendOverlay": "Send to overlay",
+    "simulatedClient": "Simulated · {count} rules matched",
+    "sentOverlay": "Sent to overlay · {count} rules matched",
+    "sentOverlayError": "Failed to send to overlay",
+    "lastDispatch": "Last dispatch (simulator)",
+    "matched": "{count} rules matched",
+    "eventStream": "Live event stream",
+    "noEvents": "No events yet. Connect or press a test button."
   }
 }

@@ -293,10 +293,11 @@ Ayrıca `"⌘K arama overlay'i açılır ve modüle götürür"` (`:64`) bu sekm
 
 ## Alt Bölüm: Debug Options (`debug`)
 
-- **Bileşen:** `DebugSection` — `setup-sections.tsx:763`
-- **Toggle:** "Enable Debug Mode" → `settings.patch({ debug: { debugMode } })`
+- **Bileşen:** `DebugSection` — `setup-sections.tsx`
+- **Toggle:** "Enable Debug Mode" → `useDebugMode()` (localStorage `livekit.debugMode.v1`) + ayrıca `settings.patch({ debug: { debugMode } })` (dışa aktarma bütünlüğü).
 - **Buton:** "Open TikTok LIVE" — **işlevsiz** (`onClick` yok)
-- **Sınırlama:** Debug modu açılabilir ama hiçbir yerde okunmaz; debug çıktısı yok.
+- **Tüketici (ARTIK VAR):** `debugMode` açıkken `components/debug/debug-panel.tsx` (`DebugPanel`) SPA kabuğunda (`app/[locale]/(app)/layout.tsx`) sağ altta yüzen bir tanılama paneli gösterir: bağlantı durumu, **canlı olay akışı** (bus'tan — gerçek TikTok + simülatör), son dispatch sonucu, **overlay sync durumu** (`lib/overlay/sync-status.ts`) ve iki test butonu (client bus + sunucu `/api/overlay/simulate`).
+- **Keşfedilebilirlik:** "Bu sayfada" TOC (debug hızlı-atlama linki dâhil) artık `xl` (≥1280px) breakpoint'inde görünür (`section-navigator.tsx`, önceden `2xl`).
 
 ---
 
@@ -323,8 +324,8 @@ Ayrıca `"⌘K arama overlay'i açılır ve modüle götürür"` (`:64`) bu sekm
    "TikTok Login", "Çıkış yap", "Switch/Restore Server", "Open TikTok LIVE".
 8. **Eksik PRD öğeleri:** Streamer.bot kurulum linki (§5.2.6), Minecraft indirme linkleri
    (§5.2.7), *"Enter your own TikTok username!"* hatası (§5.2.1), JSZip tabanlı export (§5.2.12).
-9. **Advanced/Debug ayarları okunmaz.** Kaydedilir ama hiçbir kod yolu bu bayrakları
-   kontrol etmez.
+9. **Advanced ayarları okunmaz.** Kaydedilir ama hiçbir kod yolu bu bayrakları
+   kontrol etmez. *(Debug artık istisna — `debugMode` `DebugPanel` tarafından tüketiliyor; bkz. "Debug Options" alt bölümü.)*
 10. **Pro tablosu iki yerde.** `ProSection` satırları (`:527`) ile `entitlements.limit()`
     tablosu (`lib/data/mock/index.ts:348`) ayrı ayrı tanımlıdır; tek kaynak yoktur.
 11. **Puan/seviye ayarları tüketilmez.** Faz 1'de puan kazandıran/harcatan akış yoktur

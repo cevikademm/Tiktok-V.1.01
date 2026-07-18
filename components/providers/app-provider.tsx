@@ -14,9 +14,10 @@ import type { DataBackend } from "@/lib/data/ports";
 import { type DispatchResult } from "@/lib/engine";
 import { getEngine, setEngineData } from "@/lib/engine/singleton";
 import type { Action } from "@/lib/schemas/action";
-import type { StreamEvent } from "@/lib/schemas/event";
+import type { StreamEvent, StreamTimer } from "@/lib/schemas/event";
 import type { ConnectionState, LiveEvent } from "@/lib/schemas/live";
 import { ToastProvider } from "@/components/ui/toast";
+import { useOverlaySync } from "@/lib/overlay/use-overlay-sync";
 
 /**
  * Uygulama sağlayıcısı — PRD §6.1 akışını istemci tarafında birleştirir:
@@ -37,6 +38,7 @@ interface AppContextValue {
   refresh: () => void;
   actions: Action[];
   events: StreamEvent[];
+  timers: StreamTimer[];
   lastDispatch: DispatchResult | null;
 }
 
@@ -48,6 +50,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [connection, setConnection] = useState<ConnectionState>("disconnected");
   const [actions, setActions] = useState<Action[]>([]);
   const [events, setEvents] = useState<StreamEvent[]>([]);
+  const [timers, setTimers] = useState<StreamTimer[]>([]);
   const [lastDispatch, setLastDispatch] = useState<DispatchResult | null>(null);
 
   // Motor uygulama düzeyinde tekil (bkz. lib/engine/singleton) — kuyruk ve
@@ -65,12 +68,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(() => {
     void backend.actions.list().then(setActions);
     void backend.events.list().then(setEvents);
+    void backend.timers.list().then(setTimers);
   }, [backend]);
 
   useEffect(() => {
     refresh();
     return backend.connection.subscribe(setConnection);
   }, [backend, refresh]);
+
+  // Kurallar/hesap değiştikçe sunucudaki overlay hub'ına sync (ADR-0002/0005).
+  useOverlaySync(backend, actions, events, timers, connection);
 
   const dispatch = useCallback(
     (event: LiveEvent) => {
@@ -104,9 +111,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       refresh,
       actions,
       events,
+      timers,
       lastDispatch,
     }),
-    [backend, connection, connect, disconnect, dispatch, refresh, actions, events, lastDispatch],
+    [backend, connection, connect, disconnect, dispatch, refresh, actions, events, timers, lastDispatch],
   );
 
   return (

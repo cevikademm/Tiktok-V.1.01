@@ -13,6 +13,7 @@ import { useLocalStorage } from "@/lib/use-local-storage";
 import { mutate } from "@/lib/data/mock/store";
 import { useMockStore } from "@/lib/data/mock/use-store";
 import { ADMIN_FLAG_KEY } from "./client";
+import { backupReports, deleteBackup } from "./backup";
 import type { ErrorReport, ErrorStatus } from "./types";
 
 /* -------------------------------------------------------------------------- */
@@ -69,31 +70,35 @@ export function useUnresolvedErrorCount(): number {
 /* Yazma (mutate — kök nesne kimliği değişir, useSyncExternalStore görür)      */
 /* -------------------------------------------------------------------------- */
 
-/** Yeni bildirimi başa ekler. */
+/** Yeni bildirimi başa ekler + Supabase'e yedekler (ADR-0004). */
 export function addErrorReport(report: ErrorReport): void {
   mutate((state) => {
     state.errorReports = [report, ...(state.errorReports ?? [])];
   });
+  void backupReports([report]);
 }
 
-/** Durumu değiştirir; "resolved" ise resolvedAt damgalanır. */
+/** Durumu değiştirir; "resolved" ise resolvedAt damgalanır + yedeği günceller. */
 export function setErrorReportStatus(id: string, status: ErrorStatus): void {
+  let updated: ErrorReport | undefined;
   mutate((state) => {
-    state.errorReports = (state.errorReports ?? []).map((r) =>
-      r.id === id
-        ? {
-            ...r,
-            status,
-            resolvedAt: status === "resolved" ? new Date().toISOString() : null,
-          }
-        : r,
-    );
+    state.errorReports = (state.errorReports ?? []).map((r) => {
+      if (r.id !== id) return r;
+      updated = {
+        ...r,
+        status,
+        resolvedAt: status === "resolved" ? new Date().toISOString() : null,
+      };
+      return updated;
+    });
   });
+  if (updated) void backupReports([updated]);
 }
 
-/** Bir bildirimi kalıcı olarak siler. */
+/** Bir bildirimi kalıcı olarak siler + yedekten kaldırır. */
 export function removeErrorReport(id: string): void {
   mutate((state) => {
     state.errorReports = (state.errorReports ?? []).filter((r) => r.id !== id);
   });
+  void deleteBackup(id);
 }

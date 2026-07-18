@@ -1,12 +1,16 @@
 import { notFound } from "next/navigation";
 import { MyActionsWidget } from "@/components/widgets/myactions";
+import { RemoteOverlay } from "@/components/widgets/remote-overlay";
 import { SCREEN_MAX, SCREEN_MIN } from "@/lib/schemas/action";
 import { widgetMeta } from "@/lib/widgets/registry";
 
 /**
  * Widget render — PRD §5.4 URL şeması:
  *   /widget/<widgetId>?cid=<channelId>&screen=1-8&preview=1
+ *   /widget/myactions?id=<overlayId>&screen=1-8   (gerçek OBS köprüsü — ADR-0002)
  *
+ * `id` verilmişse sunucu-SSE overlay'i (RemoteOverlay) render edilir; aksi halde
+ * eski bus-temelli (aynı-tarayıcı) demo widget'ı.
  * Faz 1'de yalnız `myactions` uygulanmıştır (PRD §15.6).
  */
 export default async function WidgetPage({
@@ -40,6 +44,12 @@ export default async function WidgetPage({
     Number.isInteger(rawScreen) && rawScreen >= SCREEN_MIN && rawScreen <= SCREEN_MAX
       ? rawScreen
       : 1;
+
+  const id = typeof query.id === "string" ? query.id.trim() : "";
+  if (id) {
+    // Gerçek OBS köprüsü: sunucu-otoriteli SSE kanalına bağlan (ADR-0002).
+    return <RemoteOverlay id={id} screen={screen} />;
+  }
 
   return <MyActionsWidget screen={screen} preview={preview} />;
 }
