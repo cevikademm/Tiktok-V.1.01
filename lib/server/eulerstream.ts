@@ -48,6 +48,62 @@ interface CloudFrame {
   data?: CloudMessage["data"];
 }
 
+/**
+ * Euler'in WebSocket kapanış nedenini kullanıcıya anlatılabilir bir mesaja çevirir.
+ *
+ * NEDEN: Euler, yayında OLMAYAN bir hesap için bağlantıyı `1011 / "WS State Error"`
+ * ile kapatır — bu ham metin kullanıcıya olduğu gibi gösterildiğinde hiçbir şey
+ * anlatmaz ("tiktok live'a bağlanamadı, hata verdi"). Asıl neden neredeyse her
+ * zaman "yayın kapalı" ya da "kullanıcı adı yanlış" olduğu için burada açıkça
+ * söylenir ve `USER_OFFLINE` koduyla işaretlenir (UI bunu hata değil, durum
+ * olarak gösterebilir).
+ */
+export function describeCloseReason(
+  closeCode: number,
+  reason: string,
+  name: string,
+): { message: string; code: string } {
+  const r = reason.trim();
+  const lower = r.toLowerCase();
+
+  // Kota/oran sınırı — Euler açıkça söyler.
+  if (lower.includes("rate limit") || lower.includes("quota") || closeCode === 1013) {
+    return {
+      message:
+        "Euler Stream kotanız doldu. Bir süre bekleyin veya planınızı yükseltin " +
+        "(ücretsiz katman: 2500 istek/gün).",
+      code: "RATE_LIMITED",
+    };
+  }
+
+  // Geçersiz/eksik anahtar.
+  if (
+    lower.includes("api key") ||
+    lower.includes("unauthorized") ||
+    lower.includes("401")
+  ) {
+    return {
+      message:
+        "Euler Stream API anahtarı reddedildi. .env.local içindeki " +
+        "EULER_STREAM_API_KEY değerini kontrol edin.",
+      code: "INVALID_KEY",
+    };
+  }
+
+  // Euler'in "yayında değil" karşılığı: oda durumu alınamadı.
+  if (lower.includes("state error") || lower.includes("room") || !r) {
+    return {
+      message:
+        `@${name} şu anda canlı yayında değil. TikTok'ta yayını başlatıp tekrar ` +
+        "deneyin. (Yayın açıksa kullanıcı adını kontrol edin — @ olmadan, " +
+        "profil adresindeki adın birebir aynısı olmalı.)",
+      code: "USER_OFFLINE",
+    };
+  }
+
+  return { message: `Bağlantı kapandı: ${r} (kod ${closeCode}).`, code: "WS_CLOSED" };
+}
+
 /** WebcastSocialMessage'ı follow/share olarak ayırır. */
 function resolveSocialType(data: CloudMessage["data"]): "follow" | "share" | null {
   const dt = (data?.common?.displayText?.displayType ?? "").toLowerCase();
@@ -193,8 +249,8 @@ export function connectEulerStream(
   ws.onerror = () => {
     if (!connectedSent) {
       fail(
-        "TikTok LIVE bağlantısı kurulamadı. Kullanıcı adını, yayının açık " +
-          "olduğunu ve Euler Stream kotanızı kontrol edin.",
+        `@${cleanName} için TikTok LIVE bağlantısı kurulamadı. ` +
+          "Kullanıcı adını ve yayının açık olduğunu kontrol edin.",
         "WS_ERROR",
       );
     }
@@ -202,14 +258,14 @@ export function connectEulerStream(
   };
 
   ws.onclose = (event: CloseEvent) => {
-    // Hiç bağlanamadan kapandıysa nedeni ilet (geçersiz anahtar, kota, offline...).
+    // Hiç bağlanamadan kapandıysa nedeni ilet (offline, geçersiz anahtar, kota...).
     if (!connectedSent) {
-      fail(
-        event.reason?.trim() ||
-          `Bağlantı kapandı (kod ${event.code}). Yayın kapalı olabilir ` +
-            `veya Euler Stream kotanız dolmuş olabilir.`,
-        "WS_CLOSED",
+      const { message, code } = describeCloseReason(
+        event.code,
+        event.reason ?? "",
+        cleanName,
       );
+      fail(message, code);
     } else {
       status("disconnected", { code: event.code, reason: event.reason ?? "" });
     }
