@@ -8,6 +8,7 @@ import {
   Volume2,
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { MediaLibrary } from "@/components/modules/media/media-library";
 import { Button } from "@/components/ui/button";
 import { Card, CardBody, CardTitle } from "@/components/ui/card";
 
@@ -102,6 +103,19 @@ export async function SoundsGrid() {
           </table>
         </div>
       </div>
+    </Card>
+  );
+}
+
+/* Yüklenen medya kütüphanesi — Supabase Storage (migration 0006).
+   Eylem editöründen veya buradan yüklenen dosyalar burada listelenir. */
+export async function SoundsLibrary() {
+  const t = await getTranslations();
+  return (
+    <Card id="section-library">
+      <CardTitle>{t("sounds.sections.library")}</CardTitle>
+      <CardBody className="mb-3">{t("sounds.libraryHint")}</CardBody>
+      <MediaLibrary kind="audio" accept="audio/*" />
     </Card>
   );
 }

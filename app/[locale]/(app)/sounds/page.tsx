@@ -4,6 +4,7 @@ import { SectionNavigator } from "@/components/layout/section-navigator";
 import {
   SoundsGrid,
   SoundsHeader,
+  SoundsLibrary,
   SoundsSettings,
   SoundsSetupWarning,
 } from "@/components/modules/sounds/sounds-sections";
@@ -33,6 +34,7 @@ export default async function SoundsPage({
 
   const sections = [
     { id: "section-sounds", label: t("sounds.sections.sounds") },
+    { id: "section-library", label: t("sounds.sections.library") },
     { id: "section-settings", label: t("sounds.sections.settings") },
   ];
 
@@ -42,6 +44,7 @@ export default async function SoundsPage({
         <SoundsHeader />
         <SoundsSetupWarning />
         <SoundsGrid />
+        <SoundsLibrary />
         <SoundsSettings />
       </div>
 
