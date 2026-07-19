@@ -248,6 +248,13 @@ export function EventEditor({
       title={event ? t("actionsandevents.editor.editEvent") : t("actionsandevents.editor.newEvent")}
       footer={
         <>
+          {/* Hata butonun yanında — modal uzun, aşağıdaki mesaj gözden kaçıyordu
+              ve buton "basmıyor" gibi görünüyordu (bkz. action-editor.tsx). */}
+          {error && (
+            <p role="alert" className="mr-auto self-center text-xs text-error">
+              {error}
+            </p>
+          )}
           <Button variant="ghost" size="sm" onClick={onClose}>
             {t("common.cancel")}
           </Button>

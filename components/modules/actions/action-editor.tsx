@@ -522,6 +522,16 @@ export function ActionEditor({
       title={action ? t("actionsandevents.editor.editAction") : t("actionsandevents.editor.newAction")}
       footer={
         <>
+          {/* Hata BUTONUN YANINDA gösterilir.
+              NEDEN: doğrulama hatası (boş/tekrar eden ad, tip seçilmemiş) yalnız
+              formun EN ÜSTÜNDEKİ ad alanında gösteriliyordu. Modal uzun olduğu
+              için Kaydet'e basmak üzere aşağı kaydıran kullanıcı hatayı hiç
+              görmüyor, buton "hiç basmıyor" gibi görünüyordu. */}
+          {(nameError ?? saveError) && (
+            <p role="alert" className="mr-auto self-center text-xs text-error">
+              {nameError ?? saveError}
+            </p>
+          )}
           <Button variant="ghost" size="sm" onClick={onClose}>
             {t("common.cancel")}
           </Button>
