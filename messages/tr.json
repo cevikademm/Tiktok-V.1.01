@@ -70,7 +70,102 @@
     "credits": "Kredi bakiyesi",
     "account": "Hesap",
     "accountDisconnected": "Disconnected",
-    "accountGuest": "Misafir"
+    "accountGuest": "Misafir",
+    "streamProfileManage": "Profilleri yönet",
+    "streamProfileAuto": "Otomatik geçiş"
+  },
+  "streamProfiles": {
+    "title": "Akış Profilleri",
+    "subtitle": "Her oyun için ayrı ayar seti. Yayındaki oyun değişince profil otomatik değişir.",
+    "count": "{count}/{max} profil",
+    "activeBadge": "Aktif",
+    "activate": "Bu profile geç",
+    "manage": "Profilleri yönet",
+    "add": "Profil ekle",
+    "duplicate": "Kopyala",
+    "export": "Dışa aktar",
+    "import": "Profil içe aktar",
+    "delete": "Profili sil",
+    "deleteConfirm": "Bu profil silinsin mi? Ayarları geri alınamaz.",
+    "reset": "Varsayılan profillere dön",
+    "resetConfirm": "Tüm profiller varsayılana dönecek. Devam edilsin mi?",
+    "noGame": "Oyun bağlı değil",
+    "games": {
+      "pubg-mobile": "PUBG Mobile",
+      "free-fire": "Free Fire",
+      "valorant": "Valorant",
+      "league-of-legends": "League of Legends",
+      "cs2": "Counter-Strike 2",
+      "minecraft": "Minecraft",
+      "gta-rp": "GTA RP",
+      "fortnite": "Fortnite",
+      "roblox": "Roblox",
+      "just-chatting": "Sohbet"
+    },
+    "fields": {
+      "name": "Profil adı",
+      "namePlaceholder": "Boş bırakılırsa oyun adı kullanılır",
+      "emoji": "Simge",
+      "game": "Bağlı oyun",
+      "keywords": "Ek başlık kelimeleri",
+      "keywordsHint": "Virgülle ayırın. Yayın başlığında bu kelimelerden biri geçerse bu profile geçilir.",
+      "autoEnabled": "Bu profil otomatik geçişe katılsın"
+    },
+    "settings": {
+      "title": "Profil ayarları",
+      "tts": "TTS (seslendirme)",
+      "ttsVolume": "TTS sesi",
+      "sounds": "Ses uyarıları",
+      "soundsVolume": "Uyarı sesi",
+      "actions": "Eylemler",
+      "chatbot": "Sohbet botu",
+      "songRequests": "Şarkı isteği",
+      "pointsMultiplier": "Puan çarpanı",
+      "overlayScreen": "Overlay ekranı",
+      "giftMinCoins": "Asgari hediye coin",
+      "cooldown": "Eylem bekleme süresi"
+    },
+    "auto": {
+      "title": "Otomatik profil geçişi",
+      "enabled": "Otomatik geçiş açık",
+      "description": "Oyun sinyali değiştiğinde eşleşen profile geçilir.",
+      "manualHold": "Elle seçimden sonra bekleme",
+      "manualHoldHint": "Elle profil seçtikten sonra otomatik geçiş bu süre boyunca devre dışı kalır.",
+      "minDwell": "Profilde asgari kalma süresi",
+      "minDwellHint": "Art arda geçişleri (flapping) engeller.",
+      "holdActive": "Elle seçim askısı sürüyor"
+    },
+    "signal": {
+      "title": "Oyun sinyali",
+      "description": "Şimdilik sinyal elle verilir; bağlayıcı geldiğinde yayın başlığından otomatik okunacak.",
+      "game": "Oyun",
+      "streamTitle": "Yayın başlığı",
+      "titlePlaceholder": "Örn: PUBG Mobile özel oda",
+      "apply": "Sinyali gönder",
+      "detected": "Algılanan oyun: {game}",
+      "none": "Sinyal yok"
+    },
+    "status": {
+      "switched": "{name} profiline geçildi",
+      "disabled": "Otomatik geçiş kapalı",
+      "manualHold": "Elle seçim askısı nedeniyle geçilmedi",
+      "noMatch": "Eşleşen profil yok",
+      "alreadyActive": "Zaten bu profil aktif",
+      "dwell": "Asgari kalma süresi dolmadı"
+    },
+    "toast": {
+      "saved": "Profil kaydedildi",
+      "activated": "{name} etkin",
+      "added": "Yeni profil eklendi",
+      "imported": "Profil içe aktarıldı",
+      "deleted": "Profil silindi",
+      "reset": "Profiller varsayılana döndü"
+    },
+    "errors": {
+      "limit": "Profil sınırına ulaşıldı ({max}). Yeni profil için önce bir profili silin.",
+      "last": "Son profil silinemez.",
+      "import": "Dosya okunamadı: geçersiz profil biçimi."
+    }
   },
   "common": {
     "save": "Kaydet",
@@ -348,12 +443,84 @@
       "tiktokLogout": "TikTok çıkışı"
     },
     "importExport": {
-      "import": "Dosyadan içe aktar",
-      "export": "Ayarları dışa aktar",
+      "description": "Gerçek TikFinity'nin dışa aktardığı .tfc dosyasını yükleyerek eylemlerinizi, etkinliklerinizi ve ayarlarınızı buraya taşıyın.",
+      "import": "TikFinity dosyası içe aktar",
+      "exportTfc": ".tfc olarak dışa aktar",
+      "exportJson": ".json yedeği indir",
       "reset": "Ayarları sıfırla",
-      "imported": "Ayarlar içe aktarıldı",
-      "exported": "Ayarlar dışa aktarıldı",
-      "invalidFile": "Geçersiz ayar dosyası"
+      "imported": "İçe aktarma tamamlandı",
+      "exported": "Dosya indirildi",
+      "invalidFile": "Geçersiz ayar dosyası",
+      "defaultExportName": "Ayarlarım",
+      "step": {
+        "pick": "Dosya seç",
+        "preview": "Ne aktarılacak?",
+        "done": "İçe aktarma tamamlandı"
+      },
+      "dropHint": "Dosyayı buraya sürükleyin",
+      "dropFormats": "TikFinity .tfc veya .json — en fazla 5 MB",
+      "chooseFile": "Dosya seç",
+      "reading": "Okunuyor…",
+      "previewHint": "{file} okundu. Aşağıdakiler eklenecek; onaylamadan hiçbir şey yazılmaz.",
+      "labelField": "Bu içe aktarmanın adı",
+      "back": "Geri",
+      "confirm": "İçe aktar",
+      "importing": "Aktarılıyor…",
+      "finish": "Kapat",
+      "doneSummary": "{actions} eylem ve {events} etkinlik kütüphanenize eklendi.",
+      "localOnly": "Oturum açık olmadığı için veri yalnız bu tarayıcıda saklandı. Giriş yaparsanız hesabınıza kalıcı olarak kaydedilir.",
+      "sourceInfo": "Kaynak sürüm: {version} · Dosya biçimi: {container}",
+      "warningsTitle": "{count} uyarı — alındı ama düzeltildi",
+      "skippedTitle": "{count} kayıt alınamadı",
+      "andMore": " ve {count} tane daha",
+      "counts": {
+        "actions": "Eylem",
+        "events": "Etkinlik",
+        "timers": "Zamanlayıcı",
+        "screens": "Ekran",
+        "widgets": "Widget"
+      },
+      "scope": {
+        "file": "Dosya",
+        "settings": "Ayarlar",
+        "action": "Eylem",
+        "event": "Etkinlik",
+        "timer": "Zamanlayıcı",
+        "screen": "Ekran",
+        "widget": "Widget"
+      },
+      "issue": {
+        "unknownActionType": "Tanınmayan eylem tipi ({detail}) düşürüldü",
+        "noActionTypes": "Hiçbir eylem tipi tanınmadı",
+        "missingName": "Adı olmayan kayıt",
+        "duplicateName": "Ad zaten kullanımda — yeniden adlandırıldı ({detail})",
+        "unknownTrigger": "Tanınmayan tetikleyici ({detail})",
+        "missingCondition": "Tetikleyicinin zorunlu koşulu eksik ({detail})",
+        "unresolvedActionRef": "İşaret edilen eylem bulunamadı ({detail})",
+        "noLinkedActions": "Etkinliğe bağlı eylem kalmadı",
+        "duplicateEvent": "Aynı tetikleyici ayarı zaten var",
+        "screenOutOfRange": "Ekran numarası 1-8 dışında ({detail}) — 1'e alındı",
+        "valueClamped": "Değer izin verilen aralığa çekildi",
+        "unknownWidget": "Tanınmayan widget",
+        "unknownSection": "Dosyada tanınmayan bölüm — yok sayıldı",
+        "invalidRecord": "Kayıt şemaya uymuyor ({detail})"
+      },
+      "error": {
+        "empty": "Dosya boş",
+        "unknownContainer": "Dosya biçimi tanınmadı — geçerli bir TikFinity .tfc dosyası mı?",
+        "corruptArchive": "Dosya bozuk veya desteklenmeyen bir arşiv",
+        "invalidJson": "Dosyanın içeriği okunamadı (bozuk JSON)",
+        "tooLarge": "Dosya çok büyük (en fazla 5 MB)",
+        "noFile": "Dosya seçilmedi",
+        "badRequest": "İstek işlenemedi",
+        "importFailed": "İçe aktarma başarısız",
+        "persistFailed": "Veriler kaydedilemedi — hiçbir değişiklik yapılmadı",
+        "exportFailed": "Dosya oluşturulamadı",
+        "network": "Sunucuya ulaşılamadı",
+        "notAuthenticated": "Bu işlem için giriş yapmalısınız",
+        "undoFailed": "Geri alma başarısız",
+        "noImportId": "İçe aktarma kimliği eksik"
+      }
     },
     "advanced": {
       "serverSideConnection": "Sunucu taraflı bağlantı",
@@ -470,7 +637,6 @@
       "editEvent": "Etkinliği Düzenle",
       "newTimer": "Yeni Zamanlayıcı",
       "editTimer": "Zamanlayıcıyı Düzenle",
-      "editTimer": "Zamanlayıcıyı Düzenle",
       "selectAtLeastOneType": "En az bir eylem tipi seçin"
     },
     "eventEditor": {
@@ -521,6 +687,11 @@
       "text": "Metin",
       "textColor": "Renk",
       "upload": "Dosya yükle",
+      "uploadFailed": "Dosya yüklenemedi. Tekrar deneyin.",
+      "uploadSignIn": "Dosya yüklemek için giriş yapmalısınız.",
+      "uploading": "Yükleniyor…",
+      "uploaded": "Dosya yüklendi.",
+      "mediaTemporary": "Bu dosya yalnız bu sekmede geçerli — sayfa yenilenince kaybolur. Kalıcı olması için giriş yapın.",
       "chooseAnimation": "Animasyon Seç",
       "soundLibrary": "Ses Kütüphanesi",
       "videoHint": "MP4 / H264 önerilir",
@@ -681,7 +852,23 @@
       "graphicOverlayDesc": "Özel görsel veya GIF ekranında gösterir."
     }
   },
+  "media": {
+    "upload": "Dosya yükle",
+    "uploading": "Yükleniyor…",
+    "uploaded": "Dosya yüklendi.",
+    "count": "{count} dosya",
+    "empty": "Henüz dosya yüklenmedi",
+    "emptyHint": "Yüklediğin sesler, görseller ve videolar burada listelenir.",
+    "copyUrl": "URL'yi kopyala",
+    "delete": "Sil",
+    "deleted": "Dosya silindi.",
+    "deleteFailed": "Dosya silinemedi.",
+    "uploadFailed": "Dosya yüklenemedi. Tekrar deneyin.",
+    "signInRequired": "Dosya yüklemek için giriş yapmalısınız.",
+    "loadFailed": "Kütüphane yüklenemedi."
+  },
   "sounds": {
+    "libraryHint": "Yüklediğin ses dosyaları burada listelenir; eylem editöründen yüklediklerin de burada görünür.",
     "title": "Sesli Uyarılar",
     "description": "Hediye, takip veya diğer olaylar aldığınızda ses çalmanın en kolay yolu.",
     "descriptionObs": "OBS veya Live Studio kullanıyorsanız, daha gelişmiş seçenekler için Eylemler ve Etkinlikler özelliğini deneyin.",
@@ -729,6 +916,7 @@
     },
     "sections": {
       "sounds": "Ses Uyarıları",
+      "library": "Kütüphane",
       "settings": "Ayarlar"
     }
   },
@@ -913,5 +1101,83 @@
     "matched": "{count} kural eşleşti",
     "eventStream": "Canlı olay akışı",
     "noEvents": "Henüz olay yok. Bağlan veya bir test butonuna bas."
+  },
+  "landing": {
+    "meta": {
+      "title": "LiveKit — TikTok LIVE giriş",
+      "description": "TikTok LIVE yayıncıları için canlı yayın stüdyosu: sesli uyarılar, TTS, overlay'ler, chatbot ve puan ekonomisi."
+    },
+    "login": {
+      "title": "Tekrar hoş geldin",
+      "subtitle": "Yayın panelini yönetmek için giriş yap.",
+      "google": "Google ile devam et",
+      "emailToggle": "E-posta ile devam et"
+    },
+    "preview": {
+      "live": "Canlı",
+      "connectTitle": "TikTok LIVE'a bağlan",
+      "connectDesc": "Kullanıcı adını gir, yayınını sesli uyarılar, overlay ve chatbot ile canlandır.",
+      "connectCta": "Bağlan",
+      "alertTitle": "Yeni en iyi hediye",
+      "alertBody": "@ayla sana bir Galaksi gönderdi",
+      "goal": "Takipçi hedefi"
+    },
+    "footer": {
+      "product": "Bir <link>fikoai.de</link> ürünüdür"
+    }
+  },
+  "home": {
+    "meta": {
+      "title": "LiveKit — TikTok LIVE canlı yayın stüdyosu",
+      "description": "TikTok LIVE yayıncıları için sesli uyarılar, TTS, overlay'ler, chatbot ve puan ekonomisi tek panelde. Kur, bağlan, yayında ol."
+    },
+    "nav": {
+      "signIn": "Giriş yap"
+    },
+    "hero": {
+      "badge": "TikTok LIVE için canlı yayın stüdyosu",
+      "titleLead": "TikTok LIVE yayınını",
+      "titleAccent": "bir üst seviyeye",
+      "titleTail": "taşı.",
+      "subtitle": "Sesli uyarılar, TTS, etkileşimli overlay'ler, chatbot ve puan ekonomisi — hepsi tek panelde. Kur, bağlan, saniyeler içinde yayında ol.",
+      "ctaSignIn": "Giriş yap",
+      "ctaExplore": "Özellikleri keşfet",
+      "trust": "Ücretsiz başla · Kart gerekmez · OBS uyumlu"
+    },
+    "features": {
+      "title": "Yayınını yöneten her şey",
+      "subtitle": "Kurulumdan sahneye kadar tek panel — sürükle-bırak kolaylığında, saniyeler içinde yayında.",
+      "alerts": {
+        "title": "Sesli uyarılar & TTS",
+        "desc": "Hediye, takip ve abonelikte özel sesler; mesajları yapay zekâ sesiyle sahnede anında okut."
+      },
+      "overlays": {
+        "title": "Etkileşimli overlay'ler",
+        "desc": "Hedef çubukları, geri sayım, çark ve coin drop overlay'lerini OBS'e tek tık ekle."
+      },
+      "chatbot": {
+        "title": "Chatbot & komutlar",
+        "desc": "Otomatik yanıtlar, zamanlanmış mesajlar ve chat komutlarıyla topluluğunu canlı tut."
+      },
+      "points": {
+        "title": "Puan ekonomisi & oyunlar",
+        "desc": "İzleyici puanları, çekilişler ve mini oyunlarla etkileşimi ve yayında kalma süresini artır."
+      }
+    },
+    "stats": {
+      "actions": "eylem tipi",
+      "triggers": "tetikleyici",
+      "screens": "overlay ekranı",
+      "languages": "dil desteği"
+    },
+    "cta": {
+      "title": "Sahne senin. Kurulum bizden.",
+      "subtitle": "Giriş yap, ilk overlay'ini iki dakikada yayına al.",
+      "button": "Giriş yap"
+    },
+    "footer": {
+      "tagline": "TikTok LIVE için canlı yayın stüdyosu.",
+      "legal": "Yasal"
+    }
   }
 }

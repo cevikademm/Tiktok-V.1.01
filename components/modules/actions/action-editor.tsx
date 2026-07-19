@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Field, Input, Select, Slider, Textarea } from "@/components/ui/field";
 import { Modal } from "@/components/ui/modal";
 import { Toggle } from "@/components/ui/toggle";
+import { useToast } from "@/components/ui/toast";
 import { useApp } from "@/components/providers/app-provider";
+import { uploadActionMedia } from "@/lib/supabase/upload-media";
 import {
   SCREEN_MAX,
   SCREEN_MIN,
@@ -42,6 +44,8 @@ function TypeConfig({
   onChange: (patch: Partial<ActionDraft["config"]>) => void;
 }) {
   const t = useTranslations();
+  const toast = useToast();
+  const [uploading, setUploading] = useState(false);
   const c = draft.config;
 
   switch (type) {
@@ -70,15 +74,19 @@ function TypeConfig({
 
     case "showImage":
     case "playAudio":
-    case "playVideoFile":
+    case "playVideoFile": {
+      // `blob:` URL yalnız onu üreten sekmede yaşar; sayfa yenilenince ölür.
+      // Supabase kuruluyken hiç üretilmez — kuruluysa uyarı gösterilir ki
+      // kullanıcı "dosya kaydedilmiyor" sanmasın.
+      const isTempMedia = (c.mediaUrl ?? "").startsWith("blob:");
       return (
         <Field
           label={t("actionsandevents.actionConfig.upload")}
           hint={type === "playVideoFile" ? t("actionsandevents.actionConfig.videoHint") : undefined}
-          htmlFor="cfg-media"
+          htmlFor={`cfg-media-${type}`}
         >
           <Input
-            id="cfg-media"
+            id={`cfg-media-${type}`}
             type="file"
             accept={
               type === "showImage"
@@ -87,14 +95,77 @@ function TypeConfig({
                   ? "audio/*"
                   : "video/*"
             }
+            disabled={uploading}
             onChange={(e) => {
               const file = e.target.files?.[0];
-              // Faz 1'de dosya yüklenmez; yalnız ad + object URL saklanır (mock).
-              if (file) onChange({ mediaName: file.name, mediaUrl: URL.createObjectURL(file) });
+              // Aynı dosya tekrar seçilebilsin diye input sıfırlanır (aksi halde
+              // change olayı ikinci kez tetiklenmez).
+              e.target.value = "";
+              if (!file) return;
+              // Supabase Storage'a yükle → KALICI public URL. `blob:` URL widget/OBS
+              // tarafından okunamadığı için ses/görsel çalmıyordu (migration 0006).
+              setUploading(true);
+              void uploadActionMedia(file)
+                .then((media) => {
+                  onChange(media);
+                  toast.show(t("actionsandevents.actionConfig.uploaded"), "success");
+                })
+                .catch((err: unknown) => {
+                  const msg = err instanceof Error ? err.message : String(err);
+                  toast.show(
+                    msg === "notSignedIn"
+                      ? t("actionsandevents.actionConfig.uploadSignIn")
+                      : t("actionsandevents.actionConfig.uploadFailed"),
+                    "error",
+                  );
+                })
+                .finally(() => setUploading(false));
             }}
           />
+
+          {uploading && (
+            <p className="text-xs text-muted">{t("actionsandevents.actionConfig.uploading")}</p>
+          )}
+
+          {/* Seçili dosya — dosya girdisi kayıtlı değeri gösteremediği için
+              yüklenen medya burada ayrıca listelenir (yoksa "kaydedilmedi" sanılıyor). */}
+          {!uploading && c.mediaUrl && (
+            <div className="flex flex-col gap-2 rounded-lg border border-border-subtle bg-surface-3 p-2.5">
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate text-xs text-white" title={c.mediaName ?? c.mediaUrl}>
+                  {c.mediaName ?? c.mediaUrl}
+                </span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onChange({ mediaUrl: undefined, mediaName: undefined })}
+                >
+                  {t("common.delete")}
+                </Button>
+              </div>
+
+              {type === "playAudio" && (
+                <audio controls preload="none" src={c.mediaUrl} className="w-full" />
+              )}
+              {type === "showImage" && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={c.mediaUrl} alt={c.mediaName ?? ""} className="max-h-24 w-fit rounded" />
+              )}
+              {type === "playVideoFile" && (
+                <video controls preload="none" src={c.mediaUrl} className="max-h-32 w-full rounded" />
+              )}
+
+              {isTempMedia && (
+                <p className="text-xs text-warning">
+                  {t("actionsandevents.actionConfig.mediaTemporary")}
+                </p>
+              )}
+            </div>
+          )}
         </Field>
       );
+    }
 
     case "showAnimation":
       return (
@@ -382,12 +453,24 @@ export function ActionEditor({
     return rest;
   });
   const [nameError, setNameError] = useState<string | null>(null);
+  /** Kaydetme hatası — sessizce yutulursa "kaydedilmiyor" gibi görünür. */
+  const [saveError, setSaveError] = useState<string | null>(null);
 
   // Widget URL'si yalnız origin + ekran numarasına bağlı — türetilmiş değer, state değil.
   const widgetUrl = backend.widgets.url("myactions", { screen: draft.screen });
 
   function patch(next: Partial<ActionDraft>) {
     setDraft((d) => ({ ...d, ...next }));
+  }
+
+  /**
+   * Config alanlarını GÜNCEL taslak üzerinden birleştirir.
+   * Fonksiyonel güncelleme şart: medya yüklemesi asenkron bittiğinde çağıran
+   * closure eski `draft`i taşıyor olabilir — `{...draft.config}` ile birleştirmek
+   * yükleme sırasında yapılan diğer config değişikliklerini siliyordu.
+   */
+  function patchConfig(cfg: Partial<ActionDraft["config"]>) {
+    setDraft((d) => ({ ...d, config: { ...d.config, ...cfg } }));
   }
 
   function toggleType(type: ActionType) {
@@ -414,10 +497,17 @@ export function ActionEditor({
       return;
     }
 
-    if (action) {
-      await backend.actions.update(action.id, draft);
-    } else {
-      await backend.actions.create(draft);
+    setSaveError(null);
+    try {
+      if (action) {
+        await backend.actions.update(action.id, draft);
+      } else {
+        await backend.actions.create(draft);
+      }
+    } catch (err) {
+      // Şema doğrulaması/depolama hatası — modal açık kalır ve sebep gösterilir.
+      setSaveError(err instanceof Error ? err.message : String(err));
+      return;
     }
     refresh();
     onSaved(t("actionsandevents.toast.actionSaved"));
@@ -497,7 +587,7 @@ export function ActionEditor({
                 <TypeConfig
                   type={type}
                   draft={draft}
-                  onChange={(cfg) => patch({ config: { ...draft.config, ...cfg } })}
+                  onChange={patchConfig}
                 />
               </div>
             ))}
@@ -640,6 +730,12 @@ export function ActionEditor({
             </Button>
           </div>
         </div>
+
+        {saveError && (
+          <p role="alert" className="text-xs text-error">
+            {t("common.error")} — {saveError}
+          </p>
+        )}
       </div>
     </Modal>
   );

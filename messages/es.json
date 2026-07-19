@@ -70,7 +70,102 @@
     "credits": "Saldo de créditos",
     "account": "Cuenta",
     "accountDisconnected": "Desconectado",
-    "accountGuest": "Invitado"
+    "accountGuest": "Invitado",
+    "streamProfileManage": "Gestionar perfiles",
+    "streamProfileAuto": "Cambio automático"
+  },
+  "streamProfiles": {
+    "title": "Perfiles de transmisión",
+    "subtitle": "Un conjunto de ajustes por juego. El perfil cambia automáticamente cuando cambia el juego.",
+    "count": "{count}/{max} perfiles",
+    "activeBadge": "Activo",
+    "activate": "Cambiar a este perfil",
+    "manage": "Gestionar perfiles",
+    "add": "Añadir perfil",
+    "duplicate": "Duplicar",
+    "export": "Exportar",
+    "import": "Importar perfil",
+    "delete": "Eliminar perfil",
+    "deleteConfirm": "¿Eliminar este perfil? Sus ajustes no se pueden recuperar.",
+    "reset": "Restaurar perfiles predeterminados",
+    "resetConfirm": "Todos los perfiles volverán a los valores predeterminados. ¿Continuar?",
+    "noGame": "Sin juego vinculado",
+    "games": {
+      "pubg-mobile": "PUBG Mobile",
+      "free-fire": "Free Fire",
+      "valorant": "Valorant",
+      "league-of-legends": "League of Legends",
+      "cs2": "Counter-Strike 2",
+      "minecraft": "Minecraft",
+      "gta-rp": "GTA RP",
+      "fortnite": "Fortnite",
+      "roblox": "Roblox",
+      "just-chatting": "Just Chatting"
+    },
+    "fields": {
+      "name": "Nombre del perfil",
+      "namePlaceholder": "Déjalo vacío para usar el nombre del juego",
+      "emoji": "Icono",
+      "game": "Juego vinculado",
+      "keywords": "Palabras clave del título",
+      "keywordsHint": "Separadas por comas. Si el título de la transmisión contiene una de ellas, se elige este perfil.",
+      "autoEnabled": "Incluir este perfil en el cambio automático"
+    },
+    "settings": {
+      "title": "Ajustes del perfil",
+      "tts": "TTS (voz)",
+      "ttsVolume": "Volumen de TTS",
+      "sounds": "Alertas de sonido",
+      "soundsVolume": "Volumen de alertas",
+      "actions": "Acciones",
+      "chatbot": "Chatbot",
+      "songRequests": "Peticiones de canciones",
+      "pointsMultiplier": "Multiplicador de puntos",
+      "overlayScreen": "Pantalla de overlay",
+      "giftMinCoins": "Monedas mínimas de regalo",
+      "cooldown": "Enfriamiento de acciones"
+    },
+    "auto": {
+      "title": "Cambio automático de perfil",
+      "enabled": "Cambio automático activado",
+      "description": "Cuando cambia la señal de juego, se activa el perfil correspondiente.",
+      "manualHold": "Espera tras elección manual",
+      "manualHoldHint": "Tras elegir un perfil manualmente, el cambio automático queda desactivado este tiempo.",
+      "minDwell": "Tiempo mínimo en un perfil",
+      "minDwellHint": "Evita cambios rápidos de ida y vuelta (flapping).",
+      "holdActive": "Espera manual en curso"
+    },
+    "signal": {
+      "title": "Señal de juego",
+      "description": "Por ahora la señal se envía manualmente; con el conector se leerá del título de la transmisión.",
+      "game": "Juego",
+      "streamTitle": "Título de la transmisión",
+      "titlePlaceholder": "p. ej. sala personalizada de PUBG Mobile",
+      "apply": "Enviar señal",
+      "detected": "Juego detectado: {game}",
+      "none": "Sin señal"
+    },
+    "status": {
+      "switched": "Se cambió a {name}",
+      "disabled": "El cambio automático está desactivado",
+      "manualHold": "Omitido: espera manual activa",
+      "noMatch": "Ningún perfil coincide",
+      "alreadyActive": "Ese perfil ya está activo",
+      "dwell": "No se alcanzó el tiempo mínimo"
+    },
+    "toast": {
+      "saved": "Perfil guardado",
+      "activated": "{name} está activo",
+      "added": "Nuevo perfil añadido",
+      "imported": "Perfil importado",
+      "deleted": "Perfil eliminado",
+      "reset": "Perfiles restaurados a los valores predeterminados"
+    },
+    "errors": {
+      "limit": "Se alcanzó el límite de perfiles ({max}). Elimina uno para añadir otro.",
+      "last": "No se puede eliminar el último perfil.",
+      "import": "No se pudo leer el archivo: formato de perfil no válido."
+    }
   },
   "common": {
     "save": "Guardar",
@@ -348,12 +443,84 @@
       "tiktokLogout": "Cerrar sesión de TikTok"
     },
     "importExport": {
-      "import": "Importar desde archivo",
-      "export": "Exportar ajustes",
+      "description": "Trae tus acciones, eventos y ajustes subiendo el archivo .tfc exportado desde el TikFinity real.",
+      "import": "Importar archivo de TikFinity",
+      "exportTfc": "Exportar como .tfc",
+      "exportJson": "Descargar copia .json",
       "reset": "Restablecer ajustes",
-      "imported": "Ajustes importados",
-      "exported": "Ajustes exportados",
-      "invalidFile": "Archivo de ajustes no válido"
+      "imported": "Importación completada",
+      "exported": "Archivo descargado",
+      "invalidFile": "Archivo de ajustes no válido",
+      "defaultExportName": "Mis ajustes",
+      "step": {
+        "pick": "Elige un archivo",
+        "preview": "¿Qué se importará?",
+        "done": "Importación completada"
+      },
+      "dropHint": "Arrastra tu archivo aquí",
+      "dropFormats": "TikFinity .tfc o .json — máx. 5 MB",
+      "chooseFile": "Elegir archivo",
+      "reading": "Leyendo…",
+      "previewHint": "Se leyó {file}. Se añadirá lo siguiente; no se escribe nada hasta que confirmes.",
+      "labelField": "Nombre de esta importación",
+      "back": "Atrás",
+      "confirm": "Importar",
+      "importing": "Importando…",
+      "finish": "Cerrar",
+      "doneSummary": "Se añadieron {actions} acciones y {events} eventos a tu biblioteca.",
+      "localOnly": "No has iniciado sesión, así que los datos se guardaron solo en este navegador. Inicia sesión para guardarlos en tu cuenta.",
+      "sourceInfo": "Versión de origen: {version} · Formato de archivo: {container}",
+      "warningsTitle": "{count} avisos — importados con correcciones",
+      "skippedTitle": "{count} registros no se pudieron importar",
+      "andMore": " y {count} más",
+      "counts": {
+        "actions": "Acciones",
+        "events": "Eventos",
+        "timers": "Temporizadores",
+        "screens": "Pantallas",
+        "widgets": "Widgets"
+      },
+      "scope": {
+        "file": "Archivo",
+        "settings": "Ajustes",
+        "action": "Acción",
+        "event": "Evento",
+        "timer": "Temporizador",
+        "screen": "Pantalla",
+        "widget": "Widget"
+      },
+      "issue": {
+        "unknownActionType": "Se descartó un tipo de acción desconocido ({detail})",
+        "noActionTypes": "No se reconoció ningún tipo de acción",
+        "missingName": "Registro sin nombre",
+        "duplicateName": "El nombre ya está en uso — renombrado ({detail})",
+        "unknownTrigger": "Disparador desconocido ({detail})",
+        "missingCondition": "Al disparador le falta su condición obligatoria ({detail})",
+        "unresolvedActionRef": "No se encontró la acción referenciada ({detail})",
+        "noLinkedActions": "No quedan acciones vinculadas a este evento",
+        "duplicateEvent": "Ya existe un evento con los mismos ajustes de disparador",
+        "screenOutOfRange": "Número de pantalla fuera de 1-8 ({detail}) — se ajustó a 1",
+        "valueClamped": "Valor ajustado al rango permitido",
+        "unknownWidget": "Widget desconocido",
+        "unknownSection": "Sección no reconocida en el archivo — ignorada",
+        "invalidRecord": "El registro no cumple el esquema ({detail})"
+      },
+      "error": {
+        "empty": "El archivo está vacío",
+        "unknownContainer": "Formato de archivo no reconocido — ¿es un archivo .tfc de TikFinity válido?",
+        "corruptArchive": "El archivo está dañado o es un archivo comprimido no compatible",
+        "invalidJson": "No se pudo leer el contenido del archivo (JSON dañado)",
+        "tooLarge": "Archivo demasiado grande (máx. 5 MB)",
+        "noFile": "No se seleccionó ningún archivo",
+        "badRequest": "No se pudo procesar la solicitud",
+        "importFailed": "La importación falló",
+        "persistFailed": "No se pudieron guardar los datos — no se cambió nada",
+        "exportFailed": "No se pudo crear el archivo",
+        "network": "No se pudo contactar con el servidor",
+        "notAuthenticated": "Debes iniciar sesión para esta acción",
+        "undoFailed": "No se pudo deshacer",
+        "noImportId": "Falta el id de importación"
+      }
     },
     "advanced": {
       "serverSideConnection": "Conexión del lado del servidor",
@@ -470,7 +637,6 @@
       "editEvent": "Editar evento",
       "newTimer": "Temporizador nuevo",
       "editTimer": "Editar temporizador",
-      "editTimer": "Editar temporizador",
       "selectAtLeastOneType": "Selecciona al menos un tipo de acción"
     },
     "eventEditor": {
@@ -521,6 +687,11 @@
       "text": "Texto",
       "textColor": "Color",
       "upload": "Subir archivo",
+      "uploadFailed": "Error al subir. Inténtalo de nuevo.",
+      "uploadSignIn": "Debes iniciar sesión para subir archivos.",
+      "uploading": "Subiendo…",
+      "uploaded": "Archivo subido.",
+      "mediaTemporary": "Este archivo solo funciona en esta pestaña y se pierde al recargar. Inicia sesión para guardarlo de forma permanente.",
       "chooseAnimation": "Elegir animación",
       "soundLibrary": "Biblioteca de sonidos",
       "videoHint": "Se recomienda MP4 / H264",
@@ -681,7 +852,23 @@
       "graphicOverlayDesc": "Imagen personalizada."
     }
   },
+  "media": {
+    "upload": "Subir archivo",
+    "uploading": "Subiendo…",
+    "uploaded": "Archivo subido.",
+    "count": "{count} archivos",
+    "empty": "Aún no hay archivos subidos",
+    "emptyHint": "Los sonidos, imágenes y vídeos que subas aparecen aquí.",
+    "copyUrl": "Copiar URL",
+    "delete": "Eliminar",
+    "deleted": "Archivo eliminado.",
+    "deleteFailed": "No se pudo eliminar el archivo.",
+    "uploadFailed": "Error al subir. Inténtalo de nuevo.",
+    "signInRequired": "Debes iniciar sesión para subir archivos.",
+    "loadFailed": "No se pudo cargar la biblioteca."
+  },
   "sounds": {
+    "libraryHint": "Los audios que subas aparecen aquí, incluidos los del editor de acciones.",
     "title": "Alertas de Sonido",
     "description": "La forma más fácil de reproducir sonidos.",
     "descriptionObs": "Para opciones avanzadas, pruebe Acciones y Eventos.",
@@ -729,6 +916,7 @@
     },
     "sections": {
       "sounds": "Alertas de Sonido",
+      "library": "Biblioteca",
       "settings": "Configuración"
     }
   },
@@ -913,5 +1101,83 @@
     "matched": "{count} reglas coincidieron",
     "eventStream": "Flujo de eventos en vivo",
     "noEvents": "Aún no hay eventos. Conéctate o pulsa un botón de prueba."
+  },
+  "landing": {
+    "meta": {
+      "title": "LiveKit — Iniciar sesión en TikTok LIVE",
+      "description": "Estudio de streaming en directo para creadores de TikTok LIVE: alertas de sonido, TTS, overlays, chatbot y economía de puntos."
+    },
+    "login": {
+      "title": "Bienvenido de nuevo",
+      "subtitle": "Inicia sesión para gestionar tu panel de streaming.",
+      "google": "Continuar con Google",
+      "emailToggle": "Continuar con e-mail"
+    },
+    "preview": {
+      "live": "En directo",
+      "connectTitle": "Conectar con TikTok LIVE",
+      "connectDesc": "Introduce tu usuario y da vida a tu directo con alertas de sonido, overlays y chatbot.",
+      "connectCta": "Conectar",
+      "alertTitle": "Nuevo regalo top",
+      "alertBody": "@ayla te envió una Galaxia",
+      "goal": "Meta de seguidores"
+    },
+    "footer": {
+      "product": "Un producto de <link>fikoai.de</link>"
+    }
+  },
+  "home": {
+    "meta": {
+      "title": "LiveKit — Estudio de streaming para TikTok LIVE",
+      "description": "Alertas de sonido, TTS, overlays, chatbot y economía de puntos para creadores de TikTok LIVE en un panel. Configura, conecta y ponte en directo."
+    },
+    "nav": {
+      "signIn": "Iniciar sesión"
+    },
+    "hero": {
+      "badge": "Un estudio de streaming para TikTok LIVE",
+      "titleLead": "Lleva tu TikTok LIVE",
+      "titleAccent": "al siguiente nivel",
+      "titleTail": ".",
+      "subtitle": "Alertas de sonido, TTS, overlays interactivos, chatbot y economía de puntos — todo en un panel. Configura, conecta y ponte en directo en segundos.",
+      "ctaSignIn": "Iniciar sesión",
+      "ctaExplore": "Descubrir funciones",
+      "trust": "Empieza gratis · Sin tarjeta · Compatible con OBS"
+    },
+    "features": {
+      "title": "Todo lo que gestiona tu directo",
+      "subtitle": "De la configuración al escenario, un panel — fácil con arrastrar y soltar, en directo en segundos.",
+      "alerts": {
+        "title": "Alertas de sonido y TTS",
+        "desc": "Sonidos propios para regalos, seguidores y suscripciones; lee los mensajes al instante con voz de IA."
+      },
+      "overlays": {
+        "title": "Overlays interactivos",
+        "desc": "Añade barras de meta, cuentas atrás, ruleta y coin drops a OBS con un solo clic."
+      },
+      "chatbot": {
+        "title": "Chatbot y comandos",
+        "desc": "Mantén viva tu comunidad con respuestas automáticas, mensajes programados y comandos de chat."
+      },
+      "points": {
+        "title": "Economía de puntos y juegos",
+        "desc": "Aumenta la interacción y el tiempo de visualización con puntos, sorteos y minijuegos."
+      }
+    },
+    "stats": {
+      "actions": "tipos de acción",
+      "triggers": "disparadores",
+      "screens": "pantallas de overlay",
+      "languages": "idiomas"
+    },
+    "cta": {
+      "title": "El escenario es tuyo. La configuración, nuestra.",
+      "subtitle": "Inicia sesión y pon tu primer overlay en directo en dos minutos.",
+      "button": "Iniciar sesión"
+    },
+    "footer": {
+      "tagline": "Estudio de streaming para TikTok LIVE.",
+      "legal": "Legal"
+    }
   }
 }

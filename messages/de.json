@@ -70,7 +70,102 @@
     "credits": "Guthaben",
     "account": "Konto",
     "accountDisconnected": "Getrennt",
-    "accountGuest": "Gast"
+    "accountGuest": "Gast",
+    "streamProfileManage": "Profile verwalten",
+    "streamProfileAuto": "Auto-Wechsel"
+  },
+  "streamProfiles": {
+    "title": "Stream-Profile",
+    "subtitle": "Ein eigener Einstellungssatz pro Spiel. Das Profil wechselt automatisch, wenn das Spiel wechselt.",
+    "count": "{count}/{max} Profile",
+    "activeBadge": "Aktiv",
+    "activate": "Zu diesem Profil wechseln",
+    "manage": "Profile verwalten",
+    "add": "Profil hinzufügen",
+    "duplicate": "Duplizieren",
+    "export": "Exportieren",
+    "import": "Profil importieren",
+    "delete": "Profil löschen",
+    "deleteConfirm": "Dieses Profil löschen? Die Einstellungen können nicht wiederhergestellt werden.",
+    "reset": "Standardprofile wiederherstellen",
+    "resetConfirm": "Alle Profile werden zurückgesetzt. Fortfahren?",
+    "noGame": "Kein Spiel verknüpft",
+    "games": {
+      "pubg-mobile": "PUBG Mobile",
+      "free-fire": "Free Fire",
+      "valorant": "Valorant",
+      "league-of-legends": "League of Legends",
+      "cs2": "Counter-Strike 2",
+      "minecraft": "Minecraft",
+      "gta-rp": "GTA RP",
+      "fortnite": "Fortnite",
+      "roblox": "Roblox",
+      "just-chatting": "Just Chatting"
+    },
+    "fields": {
+      "name": "Profilname",
+      "namePlaceholder": "Leer lassen, um den Spielnamen zu verwenden",
+      "emoji": "Symbol",
+      "game": "Verknüpftes Spiel",
+      "keywords": "Zusätzliche Titel-Stichwörter",
+      "keywordsHint": "Mit Komma trennen. Enthält der Stream-Titel eines dieser Wörter, wird dieses Profil gewählt.",
+      "autoEnabled": "Dieses Profil beim automatischen Wechsel berücksichtigen"
+    },
+    "settings": {
+      "title": "Profileinstellungen",
+      "tts": "TTS (Sprachausgabe)",
+      "ttsVolume": "TTS-Lautstärke",
+      "sounds": "Sound-Alerts",
+      "soundsVolume": "Alert-Lautstärke",
+      "actions": "Aktionen",
+      "chatbot": "Chatbot",
+      "songRequests": "Songwünsche",
+      "pointsMultiplier": "Punkte-Multiplikator",
+      "overlayScreen": "Overlay-Bildschirm",
+      "giftMinCoins": "Mindest-Coins für Geschenke",
+      "cooldown": "Aktions-Cooldown"
+    },
+    "auto": {
+      "title": "Automatischer Profilwechsel",
+      "enabled": "Automatischer Wechsel an",
+      "description": "Ändert sich das Spielsignal, wird das passende Profil aktiviert.",
+      "manualHold": "Sperre nach manueller Wahl",
+      "manualHoldHint": "Nach einer manuellen Profilwahl bleibt der automatische Wechsel so lange aus.",
+      "minDwell": "Mindestzeit auf einem Profil",
+      "minDwellHint": "Verhindert schnelles Hin- und Herschalten (Flapping).",
+      "holdActive": "Manuelle Sperre aktiv"
+    },
+    "signal": {
+      "title": "Spielsignal",
+      "description": "Vorerst wird das Signal manuell gesetzt; mit dem Connector kommt es aus dem Stream-Titel.",
+      "game": "Spiel",
+      "streamTitle": "Stream-Titel",
+      "titlePlaceholder": "z. B. PUBG Mobile Custom-Raum",
+      "apply": "Signal senden",
+      "detected": "Erkanntes Spiel: {game}",
+      "none": "Kein Signal"
+    },
+    "status": {
+      "switched": "Zu {name} gewechselt",
+      "disabled": "Automatischer Wechsel ist aus",
+      "manualHold": "Übersprungen — manuelle Sperre aktiv",
+      "noMatch": "Kein passendes Profil",
+      "alreadyActive": "Dieses Profil ist bereits aktiv",
+      "dwell": "Mindestverweildauer nicht erreicht"
+    },
+    "toast": {
+      "saved": "Profil gespeichert",
+      "activated": "{name} ist aktiv",
+      "added": "Neues Profil hinzugefügt",
+      "imported": "Profil importiert",
+      "deleted": "Profil gelöscht",
+      "reset": "Profile auf Standard zurückgesetzt"
+    },
+    "errors": {
+      "limit": "Profillimit erreicht ({max}). Lösche ein Profil, um ein neues anzulegen.",
+      "last": "Das letzte Profil kann nicht gelöscht werden.",
+      "import": "Datei konnte nicht gelesen werden: ungültiges Profilformat."
+    }
   },
   "common": {
     "save": "Speichern",
@@ -348,12 +443,84 @@
       "tiktokLogout": "TikTok Logout"
     },
     "importExport": {
-      "import": "Aus Datei importieren",
-      "export": "Einstellungen exportieren",
+      "description": "Übertrage deine Aktionen, Events und Einstellungen, indem du die aus dem echten TikFinity exportierte .tfc-Datei hochlädst.",
+      "import": "TikFinity-Datei importieren",
+      "exportTfc": "Als .tfc exportieren",
+      "exportJson": ".json-Backup herunterladen",
       "reset": "Einstellungen zurücksetzen",
-      "imported": "Einstellungen importiert",
-      "exported": "Einstellungen exportiert",
-      "invalidFile": "Ungültige Einstellungsdatei"
+      "imported": "Import abgeschlossen",
+      "exported": "Datei heruntergeladen",
+      "invalidFile": "Ungültige Einstellungsdatei",
+      "defaultExportName": "Meine Einstellungen",
+      "step": {
+        "pick": "Datei wählen",
+        "preview": "Was wird importiert?",
+        "done": "Import abgeschlossen"
+      },
+      "dropHint": "Datei hierher ziehen",
+      "dropFormats": "TikFinity .tfc oder .json — max. 5 MB",
+      "chooseFile": "Datei wählen",
+      "reading": "Wird gelesen…",
+      "previewHint": "{file} gelesen. Folgendes wird hinzugefügt; vor der Bestätigung wird nichts geschrieben.",
+      "labelField": "Name für diesen Import",
+      "back": "Zurück",
+      "confirm": "Importieren",
+      "importing": "Wird importiert…",
+      "finish": "Schließen",
+      "doneSummary": "{actions} Aktionen und {events} Events wurden deiner Bibliothek hinzugefügt.",
+      "localOnly": "Du bist nicht angemeldet, daher wurden die Daten nur in diesem Browser gespeichert. Melde dich an, um sie in deinem Konto zu sichern.",
+      "sourceInfo": "Quellversion: {version} · Dateiformat: {container}",
+      "warningsTitle": "{count} Warnungen — mit Korrekturen importiert",
+      "skippedTitle": "{count} Datensätze konnten nicht importiert werden",
+      "andMore": " und {count} weitere",
+      "counts": {
+        "actions": "Aktionen",
+        "events": "Events",
+        "timers": "Timer",
+        "screens": "Screens",
+        "widgets": "Widgets"
+      },
+      "scope": {
+        "file": "Datei",
+        "settings": "Einstellungen",
+        "action": "Aktion",
+        "event": "Event",
+        "timer": "Timer",
+        "screen": "Screen",
+        "widget": "Widget"
+      },
+      "issue": {
+        "unknownActionType": "Unbekannter Aktionstyp ({detail}) wurde entfernt",
+        "noActionTypes": "Kein Aktionstyp erkannt",
+        "missingName": "Datensatz ohne Namen",
+        "duplicateName": "Name bereits vergeben — umbenannt ({detail})",
+        "unknownTrigger": "Unbekannter Trigger ({detail})",
+        "missingCondition": "Dem Trigger fehlt die erforderliche Bedingung ({detail})",
+        "unresolvedActionRef": "Referenzierte Aktion nicht gefunden ({detail})",
+        "noLinkedActions": "Keine Aktionen mehr mit diesem Event verknüpft",
+        "duplicateEvent": "Ein Event mit denselben Trigger-Einstellungen existiert bereits",
+        "screenOutOfRange": "Screen-Nummer außerhalb 1-8 ({detail}) — auf 1 gesetzt",
+        "valueClamped": "Wert auf den erlaubten Bereich begrenzt",
+        "unknownWidget": "Unbekanntes Widget",
+        "unknownSection": "Unbekannter Abschnitt in der Datei — ignoriert",
+        "invalidRecord": "Datensatz entspricht nicht dem Schema ({detail})"
+      },
+      "error": {
+        "empty": "Die Datei ist leer",
+        "unknownContainer": "Dateiformat nicht erkannt — ist das eine gültige TikFinity-.tfc-Datei?",
+        "corruptArchive": "Die Datei ist beschädigt oder ein nicht unterstütztes Archiv",
+        "invalidJson": "Der Dateiinhalt konnte nicht gelesen werden (fehlerhaftes JSON)",
+        "tooLarge": "Datei zu groß (max. 5 MB)",
+        "noFile": "Keine Datei ausgewählt",
+        "badRequest": "Die Anfrage konnte nicht verarbeitet werden",
+        "importFailed": "Import fehlgeschlagen",
+        "persistFailed": "Daten konnten nicht gespeichert werden — nichts wurde geändert",
+        "exportFailed": "Datei konnte nicht erstellt werden",
+        "network": "Server nicht erreichbar",
+        "notAuthenticated": "Für diese Aktion musst du angemeldet sein",
+        "undoFailed": "Rückgängig machen fehlgeschlagen",
+        "noImportId": "Import-ID fehlt"
+      }
     },
     "advanced": {
       "serverSideConnection": "Serverseitige Verbindung",
@@ -470,7 +637,6 @@
       "editEvent": "Event bearbeiten",
       "newTimer": "Neuer Timer",
       "editTimer": "Timer bearbeiten",
-      "editTimer": "Timer bearbeiten",
       "selectAtLeastOneType": "Wähle mindestens einen Aktionstyp"
     },
     "eventEditor": {
@@ -521,6 +687,11 @@
       "text": "Text",
       "textColor": "Farbe",
       "upload": "Datei hochladen",
+      "uploadFailed": "Upload fehlgeschlagen. Bitte erneut versuchen.",
+      "uploadSignIn": "Zum Hochladen musst du angemeldet sein.",
+      "uploading": "Wird hochgeladen…",
+      "uploaded": "Datei hochgeladen.",
+      "mediaTemporary": "Diese Datei gilt nur in diesem Tab und geht beim Neuladen verloren. Melde dich an, um sie dauerhaft zu speichern.",
       "chooseAnimation": "Animation wählen",
       "soundLibrary": "Sound-Bibliothek",
       "videoHint": "MP4 / H264 empfohlen",
@@ -681,7 +852,23 @@
       "graphicOverlayDesc": "Zeigt benutzerdefiniertes Bild."
     }
   },
+  "media": {
+    "upload": "Datei hochladen",
+    "uploading": "Wird hochgeladen…",
+    "uploaded": "Datei hochgeladen.",
+    "count": "{count} Dateien",
+    "empty": "Noch keine Dateien hochgeladen",
+    "emptyHint": "Hochgeladene Sounds, Bilder und Videos erscheinen hier.",
+    "copyUrl": "URL kopieren",
+    "delete": "Löschen",
+    "deleted": "Datei gelöscht.",
+    "deleteFailed": "Datei konnte nicht gelöscht werden.",
+    "uploadFailed": "Upload fehlgeschlagen. Bitte erneut versuchen.",
+    "signInRequired": "Zum Hochladen musst du angemeldet sein.",
+    "loadFailed": "Bibliothek konnte nicht geladen werden."
+  },
   "sounds": {
+    "libraryHint": "Hochgeladene Audiodateien erscheinen hier – auch die aus dem Aktions-Editor.",
     "title": "Sound-Alarme",
     "description": "Der einfachste Weg, Sounds abzuspielen.",
     "descriptionObs": "Für erweiterte Optionen probiere Aktionen & Events.",
@@ -729,6 +916,7 @@
     },
     "sections": {
       "sounds": "Sound-Alarme",
+      "library": "Bibliothek",
       "settings": "Einstellungen"
     }
   },
@@ -913,5 +1101,83 @@
     "matched": "{count} Regeln getroffen",
     "eventStream": "Live-Event-Stream",
     "noEvents": "Noch keine Events. Verbinde dich oder drücke einen Test-Button."
+  },
+  "landing": {
+    "meta": {
+      "title": "LiveKit — TikTok-LIVE-Anmeldung",
+      "description": "Live-Streaming-Studio für TikTok-LIVE-Creator: Sound-Alerts, TTS, Overlays, Chatbot und Punkte-Ökonomie."
+    },
+    "login": {
+      "title": "Willkommen zurück",
+      "subtitle": "Melde dich an, um dein Streaming-Dashboard zu verwalten.",
+      "google": "Mit Google fortfahren",
+      "emailToggle": "Mit E-Mail fortfahren"
+    },
+    "preview": {
+      "live": "Live",
+      "connectTitle": "Mit TikTok LIVE verbinden",
+      "connectDesc": "Gib deinen Benutzernamen ein und erwecke deinen Stream mit Sound-Alerts, Overlays und Chatbot zum Leben.",
+      "connectCta": "Verbinden",
+      "alertTitle": "Neues Top-Geschenk",
+      "alertBody": "@ayla hat dir eine Galaxie geschickt",
+      "goal": "Follower-Ziel"
+    },
+    "footer": {
+      "product": "Ein <link>fikoai.de</link> Produkt"
+    }
+  },
+  "home": {
+    "meta": {
+      "title": "LiveKit — Live-Streaming-Studio für TikTok LIVE",
+      "description": "Sound-Alerts, TTS, Overlays, Chatbot und Punkte-Ökonomie für TikTok-LIVE-Creator in einem Dashboard. Einrichten, verbinden, live gehen."
+    },
+    "nav": {
+      "signIn": "Anmelden"
+    },
+    "hero": {
+      "badge": "Ein Live-Streaming-Studio für TikTok LIVE",
+      "titleLead": "Bring dein TikTok LIVE",
+      "titleAccent": "auf das nächste Level",
+      "titleTail": ".",
+      "subtitle": "Sound-Alerts, TTS, interaktive Overlays, Chatbot und Punkte-Ökonomie — alles in einem Dashboard. Einrichten, verbinden und in Sekunden live gehen.",
+      "ctaSignIn": "Anmelden",
+      "ctaExplore": "Funktionen entdecken",
+      "trust": "Kostenlos starten · Keine Karte nötig · Mit OBS kompatibel"
+    },
+    "features": {
+      "title": "Alles, was deinen Stream steuert",
+      "subtitle": "Vom Setup bis zur Bühne ein Dashboard — kinderleicht per Drag-and-drop, in Sekunden live.",
+      "alerts": {
+        "title": "Sound-Alerts & TTS",
+        "desc": "Eigene Sounds für Geschenke, Follows und Abos; lies Nachrichten sofort mit KI-Stimme auf der Bühne vor."
+      },
+      "overlays": {
+        "title": "Interaktive Overlays",
+        "desc": "Füge Zielbalken, Countdowns, Glücksrad und Coin-Drops mit einem Klick in OBS ein."
+      },
+      "chatbot": {
+        "title": "Chatbot & Befehle",
+        "desc": "Halte deine Community mit Auto-Antworten, geplanten Nachrichten und Chat-Befehlen aktiv."
+      },
+      "points": {
+        "title": "Punkte-Ökonomie & Spiele",
+        "desc": "Steigere Interaktion und Watchtime mit Zuschauerpunkten, Verlosungen und Mini-Spielen."
+      }
+    },
+    "stats": {
+      "actions": "Aktionstypen",
+      "triggers": "Trigger",
+      "screens": "Overlay-Screens",
+      "languages": "Sprachen"
+    },
+    "cta": {
+      "title": "Die Bühne gehört dir. Das Setup übernehmen wir.",
+      "subtitle": "Melde dich an und bring dein erstes Overlay in zwei Minuten live.",
+      "button": "Anmelden"
+    },
+    "footer": {
+      "tagline": "Live-Streaming-Studio für TikTok LIVE.",
+      "legal": "Rechtliches"
+    }
   }
 }
