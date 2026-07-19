@@ -60,10 +60,35 @@ interface OverlayState {
   upstreamUsername: string;
 }
 
+/**
+ * Bir TikTok kullanıcısına açık (ya da açılmayı bekleyen) tek upstream.
+ *
+ * Yayıncı 7/24 yayında değil: connector çoğu zaman "henüz yayında değil"
+ * cevabı alır. Bu bir HATA değil, NORMAL durumdur — bağlantı yayın açılana
+ * kadar yeniden denenmelidir. (Eskiden tek deneme yapılıyordu; başarısız
+ * olunca upstream ölü kalıyor, yayıncı yayını açsa bile connector bunu asla
+ * fark etmiyordu.)
+ */
 interface Upstream {
-  handle: EulerHandle;
+  /** Açık bağlantı; kapalıyken veya yeniden deneme beklerken null. */
+  handle: EulerHandle | null;
+  /** Kaç overlay bu kullanıcıyı istiyor (0 → bırakılır). */
   refCount: number;
+  /** Planlanmış yeniden deneme (yoksa null). */
+  retryTimer: ReturnType<typeof setTimeout> | null;
+  /** Sıradaki denemeye kalan süre — üstel artar, başarılı bağlantıda sıfırlanır. */
+  retryDelayMs: number;
+  /** releaseUpstream çağrıldı → artık yeniden deneme yapma. */
+  released: boolean;
 }
+
+/**
+ * Yeniden deneme aralığı. Euler ücretsiz katman sınırı 2500 istek/gün; tek
+ * kullanıcı için 60 sn'lik sabit aralık günde ~1440 denemedir (sınırın altında).
+ * İlk denemeler daha sık: yayın yeni açıldıysa hızlı yakalansın.
+ */
+const RETRY_BASE_MS = 15_000;
+const RETRY_MAX_MS = 60_000;
 
 const overlays = new Map<string, OverlayState>();
 const upstreams = new Map<string, Upstream>();
@@ -143,13 +168,63 @@ function ensureUpstream(username: string): void {
     existing.refCount += 1;
     return;
   }
+  const up: Upstream = {
+    handle: null,
+    refCount: 1,
+    retryTimer: null,
+    retryDelayMs: RETRY_BASE_MS,
+    released: false,
+  };
+  upstreams.set(username, up);
+  openUpstream(username, up);
+}
+
+function openUpstream(username: string, up: Upstream): void {
   console.log(`[connector] upstream AÇ → @${username}`);
-  const handle = connectEulerStream(username, {
+  up.handle = connectEulerStream(username, {
     onEvent: (_type, ev) => routeEventToOverlays(username, ev),
-    onStatus: (status) => console.log(`[connector] @${username}: ${status}`),
-    onError: (message) => console.warn(`[connector] @${username} hata: ${message}`),
+    onStatus: (status) => {
+      console.log(`[connector] @${username}: ${status}`);
+      if (status === "connected") {
+        // Bağlantı kuruldu — sonraki kopmada baştan (kısa aralıkla) dene.
+        up.retryDelayMs = RETRY_BASE_MS;
+      } else {
+        // Yayın bitti / bağlantı düştü → yeniden bağlanmayı planla.
+        scheduleReconnect(username, up, "bağlantı düştü");
+      }
+    },
+    onError: (message) => scheduleReconnect(username, up, message),
   });
-  upstreams.set(username, { handle, refCount: 1 });
+}
+
+/**
+ * Upstream'i kapatıp yeniden denemeyi planlar (üstel geri çekilme).
+ * Aynı anda birden çok tetikleyici gelebilir (önce onError, sonra onclose) —
+ * `retryTimer` kontrolü sayesinde yalnız bir deneme planlanır.
+ */
+function scheduleReconnect(username: string, up: Upstream, reason: string): void {
+  if (up.released || up.retryTimer) return;
+
+  try {
+    up.handle?.close();
+  } catch {
+    // Zaten kapalı.
+  }
+  up.handle = null;
+
+  const delay = up.retryDelayMs;
+  console.warn(
+    `[connector] @${username}: ${reason} — ${Math.round(delay / 1000)} sn sonra yeniden denenecek`,
+  );
+
+  up.retryTimer = setTimeout(() => {
+    up.retryTimer = null;
+    if (up.released || up.refCount <= 0) return;
+    up.retryDelayMs = Math.min(up.retryDelayMs * 2, RETRY_MAX_MS);
+    openUpstream(username, up);
+  }, delay);
+  // Bekleyen deneme süreci canlı tutmasın (process.exit engellenmesin).
+  up.retryTimer.unref?.();
 }
 
 function releaseUpstream(username: string): void {
@@ -159,8 +234,13 @@ function releaseUpstream(username: string): void {
   up.refCount -= 1;
   if (up.refCount <= 0) {
     console.log(`[connector] upstream KAPAT → @${username}`);
+    up.released = true;
+    if (up.retryTimer) {
+      clearTimeout(up.retryTimer);
+      up.retryTimer = null;
+    }
     try {
-      up.handle.close();
+      up.handle?.close();
     } catch {
       // Zaten kapalı.
     }
