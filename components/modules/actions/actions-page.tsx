@@ -21,6 +21,7 @@ import { useScreenPresence } from "@/lib/overlay/use-screen-presence";
 import { useLocalStorage } from "@/lib/use-local-storage";
 import { cn } from "@/lib/utils";
 import { ActionEditor } from "./action-editor";
+import { BulkEventsButton } from "./bulk-events";
 import { EventEditor } from "./event-editor";
 import { Preflight } from "./preflight";
 
@@ -536,15 +537,18 @@ export function ActionsAndEventsPage() {
       <Card id="section-events" className={cn(!enabled && "opacity-60")}>
         <div className="mb-3 flex items-center justify-between">
           <CardTitle className="mb-0">{t("actionsandevents.eventsTitle")}</CardTitle>
-          <Button
-            size="sm"
-            onClick={() => {
-              setEditingEvent(null);
-              setEventOpen(true);
-            }}
-          >
-            {t("actionsandevents.createEvent")}
-          </Button>
+          <div className="flex gap-2">
+            <BulkEventsButton />
+            <Button
+              size="sm"
+              onClick={() => {
+                setEditingEvent(null);
+                setEventOpen(true);
+              }}
+            >
+              {t("actionsandevents.createEvent")}
+            </Button>
+          </div>
         </div>
         <DataTable
           columns={eventColumns}

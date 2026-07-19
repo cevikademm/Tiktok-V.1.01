@@ -762,6 +762,15 @@
       "noEvents": "Etkin etkinlik yok. Eylemler kendi başına çalışmaz: \"Hediye geldiğinde şu eylemi çalıştır\" gibi bir ETKİNLİK oluşturup eyleminize bağlamanız gerekir.",
       "orphanActions": "Şu eylemler hiçbir etkinliğe bağlı değil, bu yüzden asla çalışmaz: {names}",
       "noScreen": "Hiçbir overlay ekranı bağlı değil. Aşağıdaki \"Ekran URL\" adresini OBS / TikTok LIVE Studio içine tarayıcı kaynağı (browser source) olarak ekleyin."
+    },
+    "bulkEvents": {
+      "button": "Tüm tetikleyicileri kur",
+      "title": "Tüm tetikleyicileri kur",
+      "hint": "Seçtiğin eylemi bir kerede tüm yaygın tetikleyicilere bağlar — tek tek etkinlik oluşturmana gerek kalmaz.",
+      "willCreate": "Oluşturulacak {count} etkinlik:",
+      "skipNote": "Komut, belirli hediye, emote ve sticker tetikleyicileri sana özel bir değer istediği için dışarıda bırakıldı — onları elle ekle.",
+      "existingNote": "Zaten var olan etkinlikler korunur, üzerine yazılmaz.",
+      "done": "{created} etkinlik oluşturuldu, {skipped} tanesi zaten vardı."
     }
   },
   "widget": {

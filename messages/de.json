@@ -762,6 +762,15 @@
       "noEvents": "Kein aktives Ereignis. Aktionen laufen nicht von allein: Du musst ein EREIGNIS wie \"wenn ein Geschenk kommt, diese Aktion ausführen\" erstellen und mit deiner Aktion verknüpfen.",
       "orphanActions": "Diese Aktionen sind mit keinem Ereignis verknüpft und werden daher nie ausgeführt: {names}",
       "noScreen": "Kein Overlay-Bildschirm verbunden. Füge die \"Bildschirm-URL\" unten in OBS / TikTok LIVE Studio als Browserquelle hinzu."
+    },
+    "bulkEvents": {
+      "button": "Alle Auslöser einrichten",
+      "title": "Alle Auslöser einrichten",
+      "hint": "Verknüpft die gewählte Aktion auf einmal mit allen gängigen Auslösern — du musst nicht jedes Ereignis einzeln anlegen.",
+      "willCreate": "{count} Ereignisse werden erstellt:",
+      "skipNote": "Befehl, bestimmtes Geschenk, Emote und Sticker brauchen einen Wert, den nur du kennst — die fügst du manuell hinzu.",
+      "existingNote": "Vorhandene Ereignisse bleiben erhalten und werden nicht überschrieben.",
+      "done": "{created} Ereignisse erstellt, {skipped} waren bereits vorhanden."
     }
   },
   "widget": {

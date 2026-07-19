@@ -762,6 +762,15 @@
       "noEvents": "No active event. Actions do not run on their own: you must create an EVENT such as \"when a gift arrives, run this action\" and link it to your action.",
       "orphanActions": "These actions are not linked to any event, so they will never run: {names}",
       "noScreen": "No overlay screen is connected. Add the \"Screen URL\" below to OBS / TikTok LIVE Studio as a browser source."
+    },
+    "bulkEvents": {
+      "button": "Set up all triggers",
+      "title": "Set up all triggers",
+      "hint": "Links the action you pick to every common trigger at once — no need to create each event by hand.",
+      "willCreate": "{count} events will be created:",
+      "skipNote": "Command, specific gift, emote and sticker triggers need a value only you know, so they are left out — add those manually.",
+      "existingNote": "Existing events are kept, never overwritten.",
+      "done": "Created {created} events, {skipped} already existed."
     }
   },
   "widget": {

@@ -762,6 +762,15 @@
       "noEvents": "No hay ningún evento activo. Las acciones no se ejecutan solas: debes crear un EVENTO como \"cuando llegue un regalo, ejecuta esta acción\" y vincularlo a tu acción.",
       "orphanActions": "Estas acciones no están vinculadas a ningún evento, por lo que nunca se ejecutarán: {names}",
       "noScreen": "No hay ninguna pantalla de overlay conectada. Añade la \"URL de pantalla\" de abajo a OBS / TikTok LIVE Studio como fuente de navegador."
+    },
+    "bulkEvents": {
+      "button": "Configurar todos los disparadores",
+      "title": "Configurar todos los disparadores",
+      "hint": "Vincula la acción que elijas a todos los disparadores comunes de una vez, sin crear cada evento a mano.",
+      "willCreate": "Se crearán {count} eventos:",
+      "skipNote": "Comando, regalo específico, emote y sticker requieren un valor que solo tú conoces, así que quedan fuera — añádelos manualmente.",
+      "existingNote": "Los eventos existentes se conservan, nunca se sobrescriben.",
+      "done": "Se crearon {created} eventos, {skipped} ya existían."
     }
   },
   "widget": {
