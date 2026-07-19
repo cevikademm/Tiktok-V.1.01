@@ -265,18 +265,87 @@ Ayrıca `"⌘K arama overlay'i açılır ve modüle götürür"` (`:64`) bu sekm
 
 ## Alt Bölüm: Import / Export Settings (`importExport`)
 
-- **Bileşen:** `ImportExportSection` — `setup-sections.tsx:630`
-- **Export:** `settings.export()` → `Blob` → `a.download = "livekit-settings.json"`
-  (`setup-sections.tsx:635-645`)
-- **Import:** `<input type="file" accept="application/json">` (`sr-only`, `<label>` ile sarılı)
-  → `settings.import(text)` → `setupSettingsSchema.parse()` → `refresh()`
-- **Hata yolu:** bozuk JSON / şema uyuşmazlığı → `try/catch` → `setup.importExport.invalidFile`
-  toast'ı, durum bozulmaz (`setup-sections.tsx:647-656`)
-- **Sıfırla:** `settings.reset()` → `refresh()`
-- **PRD farkı:** PRD §5.2.12 **JSZip + FileSaver** öngörür; kod düz `Blob` + `URL.createObjectURL`
-  kullanır (zip yok, ek bağımlılık yok). Dışa aktarılan JSON **tüm mock state**'tir
-  (`loadState()`), yalnız `settings` değil (`lib/data/mock/index.ts:191`); içe aktarma ise
-  `parsed.settings ?? parsed` ile her iki şekli de kabul eder (`:194-195`).
+> Gerçek TikFinity `.tfc` desteği — **ADR-0007**. Bölüm `setup-sections.tsx`'ten
+> `components/modules/setup/import-export/` klasörüne taşındı (kart kimliği
+> `section-importExport` korunuyor).
+
+### Bileşenler
+
+| Dosya | Görev |
+|---|---|
+| `import-export/import-export-section.tsx` | Kart: içe aktar · `.tfc` indir · `.json` indir · sıfırla |
+| `import-export/import-dialog.tsx` | 3 adımlı akış: dosya seç → önizle → onayla |
+| `import-export/import-report.tsx` | Sayaç tablosu + gruplanmış uyarı/atlama listesi |
+
+### Kitaplık (`lib/tfc/`)
+
+| Dosya | Görev |
+|---|---|
+| `container.ts` | `.tfc` kapsayıcı sniff/çöz/kodla: JSON · gzip · zlib · ZIP · base64. Bağımlılık yok (Web Streams). 64 MB açılma tavanı. |
+| `read.ts` | Toleranslı alan okuyucular: anahtar normalizasyonu + alias listeleri + tip dönüştürme |
+| `map-actions.ts` | Eylem tipleri (4 farklı gösterim), config alanları, id yeniden yazımı |
+| `map-events.ts` | `THIRD_PARTY_TRIGGER_ID` **tersi** ile tetikleyici çözümü; referans çevirisi; zamanlayıcılar |
+| `map-settings.ts` | Düz TikFinity sözlüğü → bölümlü `SetupSettings`; ekranlar; widget ayarları |
+| `import.ts` | `buildImportPlan()` (saf) + `readTfc()` (baytlar → plan) |
+| `export.ts` | `.tfc` (gzip) / `.json` üretimi — TikFinity alan adları + kanonik `livekit` bloğu |
+
+### Akış
+
+1. **Dosya seç** — `accept=".tfc,.json"` + sürükle-bırak (en fazla 5 MB)
+2. **Önizleme** — `POST /api/settings/import?dryRun=1` → **hiçbir şey yazılmaz**;
+   sayaçlar (eylem/etkinlik/zamanlayıcı/ekran/widget) + uyarı/atlama listeleri
+3. **Onay** — `POST /api/settings/import` → Supabase `import_tfc()` RPC (tek
+   transaction) + `settings.applyImport(plan)` ile yerel depo senkronu
+
+**Oturum yoksa:** Supabase adımı atlanır, plan yalnız yerel depoya uygulanır ve
+kullanıcıya "yalnız bu tarayıcıda" uyarısı gösterilir.
+
+### API
+
+| Uç nokta | Görev |
+|---|---|
+| `POST /api/settings/import?dryRun=1` | Çöz + haritala, rapor döndür (yazma yok) |
+| `POST /api/settings/import` | Aynı planı `import_tfc()` ile kalıcı yaz |
+| `DELETE /api/settings/import?importId=…` | `undo_tfc_import()` — toplu geri alma |
+
+Çözme SUNUCUDA yapılır: sıkıştırma bombası sekmeyi kilitlemesin ve önizleme ile
+yazma AYNI kodu kullansın diye.
+
+### Veri şeması (`0007_tfc_imports.sql`)
+
+- `settings_imports` — geçmiş + `previous_state` (geri alma için tekil tabloların yedeği)
+- `actions` / `stream_events` / `stream_timers` → `import_id`, `external_id` (additive)
+- `widget_settings` — yeni tablo
+- `import_tfc(payload, meta)` / `undo_tfc_import(id)` — `SECURITY INVOKER`, RLS geçerli
+
+### Erişim kontrolü
+
+Tüm tablolar RLS ile `auth.uid() = user_id`. Route **anon key + kullanıcı
+oturumu** kullanır; service-role kullanılmaz.
+
+### Test senaryoları
+
+| Test | Dosya |
+|---|---|
+| 5 kapsayıcı biçimi + BOM + NUL + bozuk girdi | `tests/tfc-container.test.ts` |
+| Alan varyantları, id yeniden yazımı, atlama gerekçeleri | `tests/tfc-import.test.ts` |
+| TikFinity uyumlu çıktı + **gidiş-dönüş kayıpsızlığı** | `tests/tfc-export.test.ts` |
+
+### Araç
+
+```bash
+pnpm tfc:inspect <dosya.tfc> [--depth 4] [--dump cikti.json] [--path actions.0]
+```
+
+Kapsayıcı biçimini, sürüm ipuçlarını ve alan iskeletini (hangi alan kaç kayıtta
+dolu) döker. Alias listeleri bu çıktıya bakılarak doğrulanır.
+
+### Bilinen sınırlama
+
+`.tfc` biçimi belgelenmemiş ve elde **gerçek referans dosya yok**. Alias
+listeleri tahminle başladı; gerçek dosya `tests/fixtures/` altına konup
+`pnpm tfc:inspect` ile doğrulanmalı ve golden test yazılmalıdır. Ürettiğimiz
+`.tfc`'nin gerçek TikFinity tarafından kabul edildiği de henüz sınanmadı.
 
 ## Alt Bölüm: Advanced Settings (`advanced`)
 
@@ -338,3 +407,4 @@ Ayrıca `"⌘K arama overlay'i açılır ve modüle götürür"` (`:64`) bu sekm
 | Tarih | Sürüm | Değişiklik | Faz |
 |---|---|---|---|
 | 2026-07-16 | 0.1.0 | Faz 0-1 ilk uygulama | Faz 1 |
+| 2026-07-19 | 0.2.0 | TikFinity `.tfc` içe/dışa aktarma (ADR-0007): `lib/tfc/` kitaplığı, 3 adımlı önizlemeli diyalog, `0007_tfc_imports.sql`, toplu geri alma | Faz 2 |

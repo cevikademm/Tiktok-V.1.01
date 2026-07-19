@@ -5,7 +5,6 @@ import {
   AccountSection,
   AdvancedSection,
   DebugSection,
-  ImportExportSection,
   LevelSettingsSection,
   MinecraftSection,
   ObsSection,
@@ -17,6 +16,9 @@ import {
   SubscriberBonusSection,
   TiktokAccountSection,
 } from "@/components/modules/setup/setup-sections";
+// ADR-0007: TikFinity `.tfc` içe/dışa aktarma kendi klasöründe (setup-sections
+// zaten 800+ satır; diyalog + rapor bileşenleri onu daha da şişirirdi).
+import { ImportExportSection } from "@/components/modules/setup/import-export/import-export-section";
 import { SETUP_SECTIONS } from "@/lib/schemas/settings";
 import { APP_NAME } from "@/lib/utils";
 

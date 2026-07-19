@@ -19,3 +19,14 @@ export function getSupabaseAnonKey(): string | undefined {
   const clean = raw?.replace(/\s/g, "");
   return clean || undefined;
 }
+
+/**
+ * Supabase kurulu mu?
+ *
+ * Auth OPSİYONELDİR: env yoksa uygulama yerel (mock) depoyla çalışmaya devam
+ * eder. Client kurmayı deneyip patlamak yerine önce bu kontrol yapılır
+ * (`createClient()` içindeki `!` non-null iddiaları yalnız kurulu iken geçerli).
+ */
+export function isSupabaseConfigured(): boolean {
+  return Boolean(getSupabaseUrl() && getSupabaseAnonKey());
+}

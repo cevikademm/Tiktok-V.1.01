@@ -1,14 +1,6 @@
 "use client";
 
-import {
-  Bell,
-  ChevronDown,
-  ChevronsUpDown,
-  CircleHelp,
-  Coins,
-  Link2,
-  Search,
-} from "lucide-react";
+import { Bell, ChevronDown, CircleHelp, Coins, Link2, Search } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { SignOutButton } from "@/components/modules/auth/sign-out-button";
@@ -20,6 +12,7 @@ import { locales, type Locale } from "@/lib/i18n/routing";
 import { SECTION_COUNTS, moduleForPath } from "@/lib/nav";
 import { APP_NAME, cn } from "@/lib/utils";
 import { SearchOverlay } from "./search-overlay";
+import { StreamProfileSwitcher } from "./stream-profile-switcher";
 
 /**
  * Topbar — PRD §4.4: 54px yükseklik, bg-white/10 backdrop-blur-lg cam efekti,
@@ -303,15 +296,7 @@ export function Topbar() {
         <Divider />
 
         {/* 7 — Stream Profile switcher */}
-        <button
-          type="button"
-          aria-label={t("topbar.streamProfileSwitch")}
-          className="flex h-8 items-center gap-2 rounded-lg px-2 text-sm text-muted-2 transition-colors hover:bg-white/8 hover:text-white"
-        >
-          <span aria-hidden>🌹</span>
-          <span className="hidden lg:inline">{t("topbar.streamProfile", { n: 1 })}</span>
-          <ChevronsUpDown className="size-3.5" aria-hidden />
-        </button>
+        <StreamProfileSwitcher />
 
         {/* 8 — Kredi bakiyesi */}
         <div

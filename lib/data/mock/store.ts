@@ -3,6 +3,14 @@ import type { Action } from "@/lib/schemas/action";
 import type { StreamEvent, StreamTimer } from "@/lib/schemas/event";
 import type { Transaction, Viewer } from "@/lib/schemas/points";
 import { setupSettingsSchema, type SetupSettings } from "@/lib/schemas/settings";
+import {
+  autoSwitchStateSchema,
+  defaultStreamProfiles,
+  gameSignalSchema,
+  type AutoSwitchState,
+  type GameSignal,
+  type StreamProfile,
+} from "@/lib/schemas/stream-profile";
 import type { OverlayScreen, WidgetId, WidgetSettings } from "@/lib/schemas/widget";
 import { widgetSettingsSchema } from "@/lib/schemas/widget";
 
@@ -24,6 +32,14 @@ export interface MockState {
   transactions: Transaction[];
   /** Hızlı Erişim toggle'ları — PRD §5.1/§15.3 (localStorage'da kalıcı). */
   quickAccess: { tts: boolean; sounds: boolean; actions: boolean };
+  /** Akış profilleri — dinamik liste, ADR-0006. */
+  streamProfiles: StreamProfile[];
+  activeProfileId: string;
+  autoSwitch: AutoSwitchState;
+  /** Son bildirilen oyun sinyali (elle seçim / başlık / connector). */
+  gameSignal: GameSignal;
+  /** Aktif profile geçiş anı (ms epoch) — dwell hesabı için. */
+  lastProfileSwitchAt: number;
   channelId: string;
   isPro: boolean;
   /** Admin hata bildirimleri (Hata Bildir modülü — Supabase'siz, localStorage). */
@@ -40,6 +56,7 @@ function defaultScreens(): OverlayScreen[] {
 }
 
 export function defaultState(): MockState {
+  const profiles = defaultStreamProfiles();
   return {
     actions: [],
     events: [],
@@ -60,6 +77,11 @@ export function defaultState(): MockState {
     viewers: [],
     transactions: [],
     quickAccess: { tts: true, sounds: true, actions: true },
+    streamProfiles: profiles,
+    activeProfileId: profiles[0].id,
+    autoSwitch: autoSwitchStateSchema.parse({}),
+    gameSignal: gameSignalSchema.parse({}),
+    lastProfileSwitchAt: 0,
     channelId: "demo-channel",
     isPro: false,
     errorReports: [],

@@ -4,10 +4,18 @@ import type { ConnectionState, LiveEvent } from "@/lib/schemas/live";
 import type { Transaction, Viewer } from "@/lib/schemas/points";
 import type { SetupSettings, TestResult } from "@/lib/schemas/settings";
 import type {
+  AutoSwitchState,
+  GameSignal,
+  StreamProfile,
+  StreamProfileDraft,
+  SwitchDecision,
+} from "@/lib/schemas/stream-profile";
+import type {
   OverlayScreen,
   WidgetId,
   WidgetSettings,
 } from "@/lib/schemas/widget";
+import type { ImportPlan } from "@/lib/tfc/types";
 
 /**
  * VERİ ERİŞİM PORTLARI — PRD §12.
@@ -58,6 +66,45 @@ export interface SettingsRepo {
   export(): Promise<string>;
   import(json: string): Promise<SetupSettings>;
   reset(): Promise<SetupSettings>;
+  /**
+   * TikFinity `.tfc` içe aktarma planını yerel depoya uygular (ADR-0007).
+   *
+   * Plan `lib/tfc` tarafında üretilir ve kullanıcı tarafından ÖNİZLEMEDE
+   * onaylanmıştır; bu yüzden burada yeniden doğrulama yapılmaz. Oturum varsa
+   * kalıcı yazma `/api/settings/import` üzerinden Supabase'e gider — bu metot
+   * yerel kopyayı senkron tutar (ve oturumsuz kullanımda tek depodur).
+   */
+  applyImport(plan: ImportPlan): Promise<void>;
+}
+
+/**
+ * Akış Profilleri — ADR-0006. Liste dinamiktir (içe aktarma ekler, silme çıkarır),
+ * üst sınır `MAX_STREAM_PROFILES`. Sınır dolduğunda `create/duplicate/importProfile`
+ * `PROFILE_LIMIT_ERROR` fırlatır; son profil silinmek istenirse `PROFILE_LAST_ERROR`.
+ */
+export interface StreamProfilesRepo {
+  list(): Promise<StreamProfile[]>;
+  active(): Promise<StreamProfile>;
+  create(draft: StreamProfileDraft): Promise<StreamProfile>;
+  /** Var olan profilin kopyası — ayarları aynen taşır, yeni id alır. */
+  duplicate(id: string): Promise<StreamProfile>;
+  update(id: string, patch: Partial<StreamProfileDraft>): Promise<StreamProfile>;
+  /** Siler; silinen profil aktifse ilk profil aktif olur. */
+  remove(id: string): Promise<void>;
+  /** `manual: true` → otomatik geçiş `manualHoldSeconds` kadar askıya alınır. */
+  activate(id: string, opts?: { manual?: boolean }): Promise<StreamProfile>;
+  /** Her içe aktarma YENİ bir profil ekler (var olanı ezmez). */
+  importProfile(json: string): Promise<StreamProfile>;
+  exportProfile(id: string): Promise<string>;
+  getAutoSwitch(): Promise<AutoSwitchState>;
+  setAutoSwitch(patch: Partial<AutoSwitchState>): Promise<AutoSwitchState>;
+  getSignal(): Promise<GameSignal>;
+  /** Oyun/başlık sinyali bildirir; gerekiyorsa profili değiştirir (PRD §6.1 akışı). */
+  reportSignal(
+    signal: Partial<GameSignal>,
+  ): Promise<{ signal: GameSignal; decision: SwitchDecision; active: StreamProfile }>;
+  /** Varsayılan 10 profile döner (kullanıcı düzenlemeleri silinir). */
+  resetAll(): Promise<StreamProfile[]>;
 }
 
 export interface WidgetRepo {
@@ -134,6 +181,7 @@ export interface DataBackend {
   timers: TimersRepo;
   screens: ScreensRepo;
   settings: SettingsRepo;
+  profiles: StreamProfilesRepo;
   widgets: WidgetRepo;
   points: PointsRepo;
   connection: ConnectionService;

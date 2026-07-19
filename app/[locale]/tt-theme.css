@@ -1,0 +1,121 @@
+/* =============================================================================
+   LiveKit — Ortak TikTok marka teması (home + login yüzeyleri)
+   -----------------------------------------------------------------------------
+   `.tt-surface` scope'u altında `--tt-*` token'ları + yardımcı sınıflar.
+   Hem `(home)` hem `(auth)` layout'u bu dosyayı import eder. Uygulamanın koyu
+   TikFinity teması (globals.css) buraya karışmaz; bileşenlerde ham hex yok.
+   ============================================================================= */
+
+.tt-surface {
+  /* Zemin — TikTok siyahı */
+  --tt-bg: #08080a;
+  --tt-bg-2: #101014;
+
+  /* Yüzeyler */
+  --tt-panel: rgba(20, 20, 24, 0.72);
+  --tt-panel-2: rgba(30, 30, 36, 0.6);
+  --tt-solid: #141418;
+  --tt-solid-2: #1c1c22;
+
+  /* Metin */
+  --tt-ink: #ffffff;
+  --tt-ink-soft: #e6e6ea;
+  --tt-muted: #a1a1ac;
+  --tt-muted-2: #71717a;
+
+  /* TikTok marka aksanları */
+  --tt-red: #fe2c55;
+  --tt-red-hover: #ec1f47;
+  --tt-cyan: #25f4ee;
+  --tt-cyan-deep: #00d9d2;
+
+  /* Çerçeveler */
+  --tt-border: rgba(255, 255, 255, 0.1);
+  --tt-border-strong: rgba(255, 255, 255, 0.18);
+
+  /* Tipografi — TikTok geometrik sans (Outfit self-host) */
+  --tt-sans: var(--font-outfit), ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Gölge / parıltı */
+  --tt-shadow: 0 30px 80px -24px rgba(0, 0, 0, 0.8), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
+
+  background:
+    radial-gradient(58% 48% at 18% 12%, rgba(37, 244, 238, 0.16), transparent 60%),
+    radial-gradient(56% 46% at 86% 84%, rgba(254, 44, 85, 0.2), transparent 60%),
+    linear-gradient(180deg, var(--tt-bg-2) 0%, var(--tt-bg) 60%);
+  color: var(--tt-ink);
+  font-family: var(--tt-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Odak halkası — TikTok cyan (WCAG 2.2 AA). */
+.tt-surface :focus-visible {
+  outline: 2px solid var(--tt-cyan);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+.tt-surface ::selection {
+  background: var(--tt-red);
+  color: #fff;
+}
+
+/* Chromatic (glitch) wordmark — TikTok imza cyan/kırmızı kayması. */
+.tt-glitch {
+  text-shadow:
+    1.2px 0 rgba(254, 44, 85, 0.7),
+    -1.2px 0 rgba(37, 244, 238, 0.7);
+}
+
+/* İki-renk marka degradesi (metin). */
+.tt-gradient-text {
+  background: linear-gradient(92deg, var(--tt-cyan) 0%, var(--tt-red) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Hareket */
+
+@keyframes ttRise {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.tt-rise {
+  animation: ttRise 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes ttPulse {
+  0%,
+  100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(254, 44, 85, 0.55);
+  }
+  50% {
+    opacity: 0.7;
+    box-shadow: 0 0 0 6px rgba(254, 44, 85, 0);
+  }
+}
+.tt-pulse {
+  animation: ttPulse 1.7s ease-in-out infinite;
+}
+
+@keyframes ttFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.tt-float {
+  animation: ttFloat 7s ease-in-out infinite;
+}

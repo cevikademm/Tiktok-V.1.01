@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "e2e": "playwright test",
     "i18n:check": "node scripts/i18n-check.mjs",
+    "tfc:inspect": "tsx scripts/tfc-inspect.ts",
     "connector": "tsx --env-file-if-exists=.env.local connector/index.ts"
   },
   "dependencies": {
