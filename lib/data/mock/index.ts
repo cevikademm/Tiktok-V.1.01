@@ -3,6 +3,19 @@ import { eventSignature, type StreamEvent, type StreamTimer } from "@/lib/schema
 import type { ConnectionState, LiveEvent } from "@/lib/schemas/live";
 import type { Transaction } from "@/lib/schemas/points";
 import { setupSettingsSchema, type SetupSettings } from "@/lib/schemas/settings";
+import { resolveSwitch } from "@/lib/engine/profile-switcher";
+import {
+  autoSwitchStateSchema,
+  defaultStreamProfiles,
+  gameSignalSchema,
+  streamProfileDraftSchema,
+  streamProfileFileSchema,
+  MAX_STREAM_PROFILES,
+  PROFILE_LAST_ERROR,
+  PROFILE_LIMIT_ERROR,
+  type StreamProfile,
+  type StreamProfileDraft,
+} from "@/lib/schemas/stream-profile";
 import {
   widgetSettingsSchema,
   type OverlayScreen,
@@ -19,6 +32,7 @@ import type {
   RealtimeBus,
   ScreensRepo,
   SettingsRepo,
+  StreamProfilesRepo,
   TimersRepo,
   WidgetRepo,
 } from "../ports";
@@ -217,7 +231,49 @@ const settings: SettingsRepo = {
   },
 
   reset: async () => delay(resetState().settings),
+
+  /**
+   * TikFinity (.tfc) içe aktarma planını yerel depoya uygular — ADR-0007.
+   *
+   * TEK `mutate()` içinde yapılır: 50 eylem için tek tek `actions.create()`
+   * çağırmak 50 ayrı yazma + 50×80 ms sahte gecikme demekti. Ayrıca yarım
+   * uygulama oluşamaz (ya hepsi ya hiçbiri).
+   *
+   * EKLER, EZMEZ: eylem/etkinlik/zamanlayıcı mevcut listelerin sonuna gelir
+   * (id'ler `lib/tfc` tarafında zaten yeniden üretilmiştir). Tekil olanlar
+   * (ayarlar/ekranlar/widget) üzerine yazılır — kullanıcı bunu önizlemede görür.
+   */
+  applyImport: async (plan) => {
+    mutate((s) => {
+      s.actions = [...s.actions, ...plan.actions];
+      s.events = [...s.events, ...plan.events];
+      s.timers = [...s.timers, ...plan.timers];
+      s.screens = plan.screens;
+      s.settings = plan.settings;
+      s.widgetSettings = { ...s.widgetSettings, ...plan.widgetSettings };
+    });
+    return delay(undefined);
+  },
 };
+
+/**
+ * Widget (overlay) sayfalarının servis edildiği kök adres.
+ *
+ * NEDEN AYARLANABİLİR: Ekran URL'i normalde panelin açık olduğu adresten
+ * türetilir (`window.location.origin`). Ama panel yerelde çalışırken widget'ın
+ * BAŞKA bir adresten servis edilmesi gerekebilir — TikTok LIVE Studio
+ * `localhost` adreslerini tarayıcı kaynağı olarak KABUL ETMİYOR ("Doğru URL'yi
+ * girin"), https bir adres istiyor. Bu durumda panel yerelde kalır (Supabase'e
+ * yazabilen tek taraf odur), widget ise yayındaki kopyadan servis edilir.
+ *
+ * `NEXT_PUBLIC_WIDGET_ORIGIN` verilmişse Kopyala butonu doğrudan o adresi üretir
+ * — kullanıcının URL'i elle düzenlemesi (ve `id`'yi bozması) gerekmez.
+ */
+function widgetOrigin(): string {
+  const configured = process.env.NEXT_PUBLIC_WIDGET_ORIGIN?.trim();
+  if (configured) return configured.replace(/\/+$/, ""); // sondaki / çift kalmasın
+  return typeof window !== "undefined" ? window.location.origin : "";
+}
 
 const widgets: WidgetRepo = {
   getSettings: (widgetId) =>
@@ -234,8 +290,7 @@ const widgets: WidgetRepo = {
     const cid = loadState().channelId;
     const search = new URLSearchParams({ cid });
     for (const [k, v] of Object.entries(params ?? {})) search.set(k, String(v));
-    const origin = typeof window !== "undefined" ? window.location.origin : "";
-    return `${origin}/widget/${widgetId}?${search.toString()}`;
+    return `${widgetOrigin()}/widget/${widgetId}?${search.toString()}`;
   },
 };
 
@@ -379,6 +434,180 @@ function createBus(): RealtimeBus {
   };
 }
 
+/* -------------------------------------------------------------------------- */
+/* Akış Profilleri — ADR-0006                                                  */
+/* -------------------------------------------------------------------------- */
+
+function readProfile(id: string): StreamProfile {
+  const found = loadState().streamProfiles.find((p) => p.id === id);
+  if (!found) throw new Error(`Profil bulunamadı: ${id}`);
+  return found;
+}
+
+/** Aktif profil kaydı — bozuk/eksik id'de listenin ilkine düşer (UI asla boş kalmaz). */
+function readActive(): StreamProfile {
+  const state = loadState();
+  return (
+    state.streamProfiles.find((p) => p.id === state.activeProfileId) ??
+    state.streamProfiles[0]
+  );
+}
+
+/**
+ * Profili yürürlüğe koyar. Faz 1'de görünür etkisi Hızlı Erişim anahtarlarıdır
+ * (PRD §5.1); ses/çarpan/ekran alanları motora Faz 2'de bağlanacak (ADR-0006 §Sonuç).
+ */
+function applyProfile(profile: StreamProfile, at: number): void {
+  mutate((s) => {
+    s.activeProfileId = profile.id;
+    s.lastProfileSwitchAt = at;
+    s.quickAccess = {
+      tts: profile.settings.ttsEnabled,
+      sounds: profile.settings.soundsEnabled,
+      actions: profile.settings.actionsEnabled,
+    };
+  });
+}
+
+function insertProfile(draft: StreamProfileDraft): StreamProfile {
+  if (loadState().streamProfiles.length >= MAX_STREAM_PROFILES) {
+    throw new Error(PROFILE_LIMIT_ERROR);
+  }
+  const profile: StreamProfile = { ...streamProfileDraftSchema.parse(draft), id: newId("prf") };
+  mutate((s) => {
+    s.streamProfiles = [...s.streamProfiles, profile];
+  });
+  return profile;
+}
+
+const profiles: StreamProfilesRepo = {
+  list: () => delay([...loadState().streamProfiles]),
+  active: () => delay(readActive()),
+
+  create: async (draft) => delay(insertProfile(draft)),
+
+  duplicate: async (id) => {
+    const source = readProfile(id);
+    const { id: _ignored, ...draft } = source;
+    return delay(insertProfile(draft));
+  },
+
+  update: async (id, patch) => {
+    const current = readProfile(id);
+    const updated: StreamProfile = {
+      ...streamProfileDraftSchema.parse({ ...current, ...patch }),
+      id,
+    };
+    mutate((s) => {
+      const idx = s.streamProfiles.findIndex((p) => p.id === id);
+      if (idx !== -1) s.streamProfiles[idx] = updated;
+    });
+    // Aktif profil düzenlendiyse yeni ayarlar anında yürürlüğe girer. Düzenleme bir
+    // GEÇİŞ değildir; dwell sayacı korunur, aksi halde her kaydırma dwell'i sıfırlardı.
+    if (loadState().activeProfileId === id) {
+      applyProfile(updated, loadState().lastProfileSwitchAt);
+    }
+    return delay(updated);
+  },
+
+  remove: async (id) => {
+    const state = loadState();
+    if (state.streamProfiles.length <= 1) throw new Error(PROFILE_LAST_ERROR);
+    readProfile(id); // yoksa hata verir
+    const remaining = state.streamProfiles.filter((p) => p.id !== id);
+    mutate((s) => {
+      s.streamProfiles = remaining;
+    });
+    if (state.activeProfileId === id) applyProfile(remaining[0], Date.now());
+    return delay(undefined);
+  },
+
+  activate: async (id, opts) => {
+    const profile = readProfile(id);
+    const now = Date.now();
+    applyProfile(profile, now);
+    if (opts?.manual) {
+      // Elle seçim, otomatik geçişi bir süre susturur (PRD §6.2 mantığıyla aynı ruh).
+      mutate((s) => {
+        s.autoSwitch = {
+          ...s.autoSwitch,
+          manualHoldUntil: now + s.autoSwitch.manualHoldSeconds * 1000,
+        };
+      });
+    }
+    return delay(profile);
+  },
+
+  importProfile: async (json) => {
+    const raw: unknown = JSON.parse(json);
+    // Hem dosya sarmalayıcısı hem çıplak profil nesnesi kabul edilir.
+    const file = streamProfileFileSchema.safeParse(raw);
+    const draft = file.success
+      ? file.data.profile
+      : streamProfileDraftSchema.parse(raw);
+    return delay(insertProfile(draft));
+  },
+
+  exportProfile: async (id) => {
+    const { id: _ignored, ...draft } = readProfile(id);
+    return delay(
+      JSON.stringify(
+        streamProfileFileSchema.parse({
+          kind: "livekit.streamProfile",
+          version: 1,
+          profile: draft,
+        }),
+        null,
+        2,
+      ),
+    );
+  },
+
+  getAutoSwitch: () => delay({ ...loadState().autoSwitch }),
+
+  setAutoSwitch: async (patch) => {
+    const next = autoSwitchStateSchema.parse({ ...loadState().autoSwitch, ...patch });
+    mutate((s) => {
+      s.autoSwitch = next;
+    });
+    return delay(next);
+  },
+
+  getSignal: () => delay({ ...loadState().gameSignal }),
+
+  reportSignal: async (patch) => {
+    const now = Date.now();
+    const signal = gameSignalSchema.parse({ ...loadState().gameSignal, ts: now, ...patch });
+    mutate((s) => {
+      s.gameSignal = signal;
+    });
+
+    const state = loadState();
+    const decision = resolveSwitch({
+      profiles: state.streamProfiles,
+      activeProfileId: state.activeProfileId,
+      signal,
+      state: state.autoSwitch,
+      lastSwitchAt: state.lastProfileSwitchAt,
+      now,
+    });
+
+    if (decision.switched) applyProfile(readProfile(decision.profileId), now);
+    return delay({ signal, decision, active: readActive() });
+  },
+
+  resetAll: async () => {
+    const fresh = defaultStreamProfiles();
+    mutate((s) => {
+      s.streamProfiles = fresh;
+      s.autoSwitch = autoSwitchStateSchema.parse({});
+      s.gameSignal = gameSignalSchema.parse({});
+    });
+    applyProfile(fresh[0], Date.now());
+    return delay(fresh);
+  },
+};
+
 const simulator: EventSimulator = {
   simulate: (kind, options) => simulateEvent(kind, options),
 };
@@ -413,6 +642,7 @@ export function createMockBackend(): DataBackend {
     timers,
     screens,
     settings,
+    profiles,
     widgets,
     points,
     connection: createConnection(),
