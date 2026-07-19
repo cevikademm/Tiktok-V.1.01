@@ -59,9 +59,27 @@ export function TiktokAccountSection() {
   const connected = connection === "live";
 
   async function onSubmit(values: TiktokAccountForm) {
+    // Kullanıcı adı AYARDIR, bağlantı sonucundan bağımsız kaydedilir.
+    //
+    // NEDEN ÖNCE KAYDEDİLİYOR: gerçek TikTok bağlantısı (DATA_BACKEND=tiktok)
+    // hesap o an yayında değilse hata fırlatır. Kaydetme bağlantıdan sonra
+    // yapılsaydı — eskiden olduğu gibi — yayın kapalıyken kullanıcı adı HİÇ
+    // kaydedilmezdi. Connector de config'te username boş olduğu için yayına
+    // hiç bağlanmazdı: kullanıcı adını girmiş olsa bile sistem sessizce ölü
+    // kalırdı. Artık ad kalıcıdır; yayın açıldığında connector kendi bağlanır.
+    const username = values.username.replace(/^@/, "").trim();
     try {
-      await connect(values.username);
+      await backend.settings.patch({ tiktok: { username } });
     } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast.show(message, "error");
+      return;
+    }
+
+    try {
+      await connect(username);
+    } catch (err) {
+      // Ad kaydedildi; yalnız "şimdi bağlan" başarısız oldu (ör. yayın kapalı).
       const message = err instanceof Error ? err.message : String(err);
       toast.show(message, "error");
     }
@@ -640,69 +658,12 @@ export function AccountSection() {
   );
 }
 
-/* 12 — Import / Export */
-export function ImportExportSection() {
-  const t = useTranslations();
-  const { backend, refresh } = useApp();
-  const toast = useToast();
-
-  async function handleExport() {
-    const json = await backend.settings.export();
-    const blob = new Blob([json], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${APP_NAME.toLowerCase()}-settings.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.show(t("setup.importExport.exported"));
-  }
-
-  async function handleImport(file: File) {
-    try {
-      await backend.settings.import(await file.text());
-      refresh();
-      toast.show(t("setup.importExport.imported"));
-    } catch {
-      // Şema uyuşmuyor veya bozuk JSON — kullanıcıya bildir, durumu bozma.
-      toast.show(t("setup.importExport.invalidFile"), "error");
-    }
-  }
-
-  return (
-    <Card id="section-importExport">
-      <CardTitle>{t("setup.sections.importExport")}</CardTitle>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <label className="cursor-pointer rounded-lg bg-surface-3 px-4 py-2 text-sm text-white transition-colors hover:bg-surface-4">
-          {t("setup.importExport.import")}
-          <input
-            type="file"
-            accept="application/json"
-            className="sr-only"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void handleImport(file);
-            }}
-          />
-        </label>
-        <Button variant="secondary" size="sm" onClick={handleExport}>
-          {t("setup.importExport.export")}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={async () => {
-            await backend.settings.reset();
-            refresh();
-            toast.show(t("setup.saved"));
-          }}
-        >
-          {t("setup.importExport.reset")}
-        </Button>
-      </div>
-    </Card>
-  );
-}
+/*
+ * 12 — Import / Export
+ * ADR-0007 ile `components/modules/setup/import-export/`e taşındı:
+ * `.tfc` çözme + önizleme diyaloğu + rapor bu dosyayı 1000 satırın üstüne
+ * çıkarırdı. Bölümün kart kimliği (`section-importExport`) korunuyor.
+ */
 
 /* 13 — Advanced Settings */
 export function AdvancedSection() {
