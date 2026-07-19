@@ -752,6 +752,16 @@
       "actionsLimit": "Im kostenlosen Plan kannst du bis zu {limit} Aktionen erstellen.",
       "actionsLimitReached": "Du hast das Aktionslimit ({limit}) erreicht. Upgrade auf PRO für unbegrenzte Aktionen.",
       "expired": "Einige Aktionen sind derzeit deaktiviert, weil dein {pro} Abo abgelaufen ist."
+    },
+    "preflight": {
+      "title": "Startbereitschaft — es fehlt etwas",
+      "ready": "Alles bereit. Deine Aktionen werden im Livestream ausgelöst.",
+      "masterOff": "Der Hauptschalter ist AUS. Keine Aktion läuft, solange er aus ist.",
+      "noUsername": "TikTok-Benutzername ist leer. Fülle Einrichtung → \"Dein TikTok-Name\" aus und speichere — sonst wird nie eine Verbindung zu deinem Livestream hergestellt und kein Geschenk oder Kommentar erreicht dich.",
+      "noActions": "Noch keine Aktionen. Erstelle zuerst eine Aktion (z. B. Ton abspielen).",
+      "noEvents": "Kein aktives Ereignis. Aktionen laufen nicht von allein: Du musst ein EREIGNIS wie \"wenn ein Geschenk kommt, diese Aktion ausführen\" erstellen und mit deiner Aktion verknüpfen.",
+      "orphanActions": "Diese Aktionen sind mit keinem Ereignis verknüpft und werden daher nie ausgeführt: {names}",
+      "noScreen": "Kein Overlay-Bildschirm verbunden. Füge die \"Bildschirm-URL\" unten in OBS / TikTok LIVE Studio als Browserquelle hinzu."
     }
   },
   "widget": {

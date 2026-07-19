@@ -752,6 +752,16 @@
       "actionsLimit": "Ücretsiz planda {limit} eyleme kadar oluşturabilirsiniz.",
       "actionsLimitReached": "Eylem limitine ulaştınız ({limit}). Sınırsız eylem için PRO'ya geçin.",
       "expired": "Bazı eylemler şu anda devre dışı çünkü {pro} aboneliğinizin süresi doldu."
+    },
+    "preflight": {
+      "title": "Yayına hazırlık — eksikler var",
+      "ready": "Her şey hazır. Canlı yayında eylemleriniz tetiklenecek.",
+      "masterOff": "Ana anahtar KAPALI. Yukarıdaki anahtarı açmadan hiçbir eylem çalışmaz.",
+      "noUsername": "TikTok kullanıcı adı boş. Kurulum → \"TikTok Adınız\" alanını doldurup kaydedin — aksi halde canlı yayınınıza hiç bağlanılmaz ve hiçbir hediye/yorum size ulaşmaz.",
+      "noActions": "Hiç eylem yok. Önce bir eylem oluşturun (ör. ses çal).",
+      "noEvents": "Etkin etkinlik yok. Eylemler kendi başına çalışmaz: \"Hediye geldiğinde şu eylemi çalıştır\" gibi bir ETKİNLİK oluşturup eyleminize bağlamanız gerekir.",
+      "orphanActions": "Şu eylemler hiçbir etkinliğe bağlı değil, bu yüzden asla çalışmaz: {names}",
+      "noScreen": "Hiçbir overlay ekranı bağlı değil. Aşağıdaki \"Ekran URL\" adresini OBS / TikTok LIVE Studio içine tarayıcı kaynağı (browser source) olarak ekleyin."
     }
   },
   "widget": {

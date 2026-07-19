@@ -752,6 +752,16 @@
       "actionsLimit": "En el plan gratuito puedes crear hasta {limit} acciones.",
       "actionsLimitReached": "Has alcanzado el límite de acciones ({limit}). Pásate a PRO para tener acciones ilimitadas.",
       "expired": "Algunas acciones están desactivadas ahora mismo porque tu suscripción {pro} ha caducado."
+    },
+    "preflight": {
+      "title": "Comprobación previa — falta algo",
+      "ready": "Todo listo. Tus acciones se activarán durante la transmisión en vivo.",
+      "masterOff": "El interruptor principal está APAGADO. Ninguna acción se ejecuta hasta que lo actives.",
+      "noUsername": "El nombre de usuario de TikTok está vacío. Completa Configuración → \"Tu nombre de TikTok\" y guarda — de lo contrario nunca se conecta a tu directo y ningún regalo o comentario te llega.",
+      "noActions": "Aún no hay acciones. Crea primero una acción (por ejemplo, reproducir un sonido).",
+      "noEvents": "No hay ningún evento activo. Las acciones no se ejecutan solas: debes crear un EVENTO como \"cuando llegue un regalo, ejecuta esta acción\" y vincularlo a tu acción.",
+      "orphanActions": "Estas acciones no están vinculadas a ningún evento, por lo que nunca se ejecutarán: {names}",
+      "noScreen": "No hay ninguna pantalla de overlay conectada. Añade la \"URL de pantalla\" de abajo a OBS / TikTok LIVE Studio como fuente de navegador."
     }
   },
   "widget": {

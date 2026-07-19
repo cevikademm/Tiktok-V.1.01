@@ -22,6 +22,7 @@ import { useLocalStorage } from "@/lib/use-local-storage";
 import { cn } from "@/lib/utils";
 import { ActionEditor } from "./action-editor";
 import { EventEditor } from "./event-editor";
+import { Preflight } from "./preflight";
 
 /**
  * Eylemler ve Etkinlikler — PRD §5.3.
@@ -484,6 +485,14 @@ export function ActionsAndEventsPage() {
         <span className="text-sm text-warning">{t("actionsandevents.startHere")}</span>
         <Toggle checked={enabled} onChange={setEnabled} label={t("actionsandevents.masterToggle")} />
       </div>
+
+      {/* Yayına hazırlık — zincirdeki kopuk halkayı yayın ÖNCESİ göster. */}
+      <Preflight
+        actions={actions}
+        events={events}
+        onlineScreens={onlineScreens}
+        enabled={enabled}
+      />
 
       {/* Actions */}
       <Card id="section-actions" className={cn(!enabled && "opacity-60")}>

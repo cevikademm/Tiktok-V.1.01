@@ -62,6 +62,113 @@ async function fireAnimation(animationId?: string): Promise<void> {
 /* Render bileşeni                                                             */
 /* -------------------------------------------------------------------------- */
 
+/* -------------------------------------------------------------------------- */
+/* Ses/video oynatma — autoplay engelini yakala ve ilk etkileşimde çöz          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Medyayı AÇIKÇA oynatır ve başarısızlığı yutmaz.
+ *
+ * `autoPlay` niteliği sessizdir: tarayıcı autoplay'i engellerse hiçbir iz
+ * bırakmadan çalmaz — "ses eklendi ama çalmadı" şikâyetinin en sık sebebi budur.
+ * OBS'in CEF'i autoplay'e izin verir, ancak TikTok LIVE Studio gibi gömülü
+ * tarayıcılar ve normal sekmeler engelleyebilir. Burada:
+ *   1) `play()` sözü reddedilirse konsola AÇIK bir tanı yazılır,
+ *   2) ilk kullanıcı etkileşiminde (tıklama/tuş/dokunma) tekrar denenir,
+ *   3) `error` olayı (404 / bozuk dosya / CORS) ayrıca raporlanır.
+ */
+function useMediaAutoplay(
+  ref: { current: HTMLMediaElement | null },
+  volume: number,
+  queueId: string,
+) {
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    el.volume = volume;
+    let unlock: (() => void) | null = null;
+
+    const attempt = () => {
+      const p = el.play();
+      if (!p) return;
+      p.catch((err: unknown) => {
+        const name = err instanceof Error ? err.name : String(err);
+        console.warn(
+          `[overlay] medya oynatılamadı (${name}) — src=${el.currentSrc || el.src}. ` +
+            "Tarayıcı autoplay'i engelledi; ilk etkileşimde yeniden denenecek.",
+        );
+        // Tek seferlik kilit açma: sayfaya herhangi bir etkileşim gelirse tekrar dene.
+        unlock = () => {
+          void el.play().catch(() => {});
+        };
+        for (const ev of ["pointerdown", "keydown", "touchstart"] as const) {
+          window.addEventListener(ev, unlock, { once: true });
+        }
+      });
+    };
+
+    const onError = () => {
+      console.error(
+        `[overlay] medya YÜKLENEMEDİ — src=${el.currentSrc || el.src}. ` +
+          "Dosya URL'si erişilebilir mi? (blob: URL'ler yalnız üretildiği sekmede geçerlidir.)",
+      );
+    };
+    el.addEventListener("error", onError);
+
+    attempt();
+
+    return () => {
+      el.removeEventListener("error", onError);
+      if (unlock) {
+        for (const ev of ["pointerdown", "keydown", "touchstart"] as const) {
+          window.removeEventListener(ev, unlock);
+        }
+      }
+    };
+    // queueId: aynı dosya art arda gelse bile her action için yeniden oynat.
+  }, [ref, volume, queueId]);
+}
+
+function AudioTrack({
+  src,
+  volume,
+  queueId,
+}: {
+  src: string;
+  volume: number;
+  queueId: string;
+}) {
+  const ref = useRef<HTMLAudioElement | null>(null);
+  useMediaAutoplay(ref, volume, queueId);
+  // `key` (çağıran tarafta queueId) elementi sıfırlar → src değişimi garanti yeniden yüklenir.
+  return <audio ref={ref} src={src} autoPlay preload="auto" />;
+}
+
+function VideoTrack({
+  src,
+  volume,
+  queueId,
+}: {
+  src: string;
+  volume: number;
+  queueId: string;
+}) {
+  const ref = useRef<HTMLVideoElement | null>(null);
+  useMediaAutoplay(ref, volume, queueId);
+  return (
+    <video
+      ref={ref}
+      src={src}
+      autoPlay
+      playsInline
+      muted={volume === 0}
+      preload="auto"
+      className="max-h-[60vh] max-w-[80vw]"
+    />
+  );
+}
+
 export function ActionRenderer({
   action,
   fading,
@@ -108,24 +215,20 @@ export function ActionRenderer({
       )}
 
       {action.types.includes("playVideoFile") && action.mediaUrl && (
-        <video
+        <VideoTrack
+          key={`v-${action.queueId}`}
           src={action.mediaUrl}
-          autoPlay
-          muted={volume === 0}
-          ref={(el) => {
-            if (el) el.volume = volume;
-          }}
-          className="max-h-[60vh] max-w-[80vw]"
+          volume={volume}
+          queueId={action.queueId}
         />
       )}
 
       {action.types.includes("playAudio") && action.mediaUrl && (
-        <audio
+        <AudioTrack
+          key={`a-${action.queueId}`}
           src={action.mediaUrl}
-          autoPlay
-          ref={(el) => {
-            if (el) el.volume = volume;
-          }}
+          volume={volume}
+          queueId={action.queueId}
         />
       )}
     </div>

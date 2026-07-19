@@ -752,6 +752,16 @@
       "actionsLimit": "You can create up to {limit} actions on the free plan.",
       "actionsLimitReached": "You reached the action limit ({limit}). Upgrade to PRO for unlimited actions.",
       "expired": "Some actions are currently disabled because your {pro} subscription has expired."
+    },
+    "preflight": {
+      "title": "Go-live check — something is missing",
+      "ready": "All set. Your actions will fire during the live stream.",
+      "masterOff": "The master switch is OFF. No action runs until you turn it on.",
+      "noUsername": "TikTok username is empty. Fill in Setup → \"Your TikTok name\" and save — otherwise nothing ever connects to your live stream and no gift or comment reaches you.",
+      "noActions": "No actions yet. Create an action first (e.g. play a sound).",
+      "noEvents": "No active event. Actions do not run on their own: you must create an EVENT such as \"when a gift arrives, run this action\" and link it to your action.",
+      "orphanActions": "These actions are not linked to any event, so they will never run: {names}",
+      "noScreen": "No overlay screen is connected. Add the \"Screen URL\" below to OBS / TikTok LIVE Studio as a browser source."
     }
   },
   "widget": {
