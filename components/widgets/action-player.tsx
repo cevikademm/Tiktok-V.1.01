@@ -246,15 +246,49 @@ export interface ActionPlayer {
   push: (item: ResolvedAction) => void;
 }
 
+/**
+ * Aynı olayın tekrar oynatılmasını engelleme penceresi.
+ *
+ * `LiveEvent.id` kaynakta (TikTok mesajı) üretilir ve olay başına tekildir, yani
+ * meşru bir tekrar (aynı kişinin ikinci hediyesi) FARKLI bir id taşır — bu
+ * pencere yanlışlıkla bir şeyi bastırmaz. Yalnız aynı olayın ikinci KOPYASINI
+ * eler: iki connector örneği çalıştığında, connector yeniden başladığında veya
+ * Realtime mesajı yeniden ilettiğinde ses iki kez çalıyordu.
+ */
+const DEDUPE_WINDOW_MS = 60_000;
+const DEDUPE_MAX_ENTRIES = 500;
+
 export function useActionPlayer(): ActionPlayer {
   const [current, setCurrent] = useState<ResolvedAction | null>(null);
   const [fading, setFading] = useState<"in" | "out">("in");
   const [queueLength, setQueueLength] = useState(0);
   const queueRef = useRef<ResolvedAction[]>([]);
+  /** `${actionId}:${sourceEventId}` → ilk görülme zamanı. */
+  const seenRef = useRef<Map<string, number>>(new Map());
   // `push` çağrıldığında pump effect'ini tetiklemek için sayaç.
   const [tick, setTick] = useState(0);
 
   const push = useCallback((item: ResolvedAction) => {
+    // Tekilleştirme — yalnız kaynak olay kimliği varsa (eski yayıncılar göndermez).
+    if (item.sourceEventId) {
+      const key = `${item.actionId}:${item.sourceEventId}`;
+      const now = Date.now();
+      const seen = seenRef.current;
+      const prev = seen.get(key);
+      if (prev !== undefined && now - prev < DEDUPE_WINDOW_MS) return; // yinelenen — yut
+      seen.set(key, now);
+      // Sınırsız büyümesin: pencere dışı kayıtları at, hâlâ büyükse en eskiyi kırp.
+      if (seen.size > DEDUPE_MAX_ENTRIES) {
+        for (const [k, at] of seen) {
+          if (now - at >= DEDUPE_WINDOW_MS) seen.delete(k);
+        }
+        while (seen.size > DEDUPE_MAX_ENTRIES) {
+          const oldest = seen.keys().next();
+          if (oldest.done) break;
+          seen.delete(oldest.value);
+        }
+      }
+    }
     queueRef.current.push(item);
     setTick((t) => t + 1);
   }, []);

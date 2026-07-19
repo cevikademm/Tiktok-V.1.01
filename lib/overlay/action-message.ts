@@ -32,6 +32,8 @@ export function buildActionMessage(
       fadeInMs: action.fadeInMs,
       fadeOutMs: action.fadeOutMs,
       animationId: action.config.animationId,
+      // Tekilleştirme anahtarı — bkz. widgetInboundSchema.sourceEventId.
+      sourceEventId: ev.id,
     },
   };
 }

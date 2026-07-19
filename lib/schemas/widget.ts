@@ -150,6 +150,14 @@ export const widgetInboundSchema = z.discriminatedUnion("kind", [
       fadeOutMs: z.number().optional(),
       /** showAnimation — confetti/hearts/fireworks (ADR-0002). */
       animationId: z.string().optional(),
+      /**
+       * Bu eylemi tetikleyen canlı olayın kimliği (`LiveEvent.id`) — TEKİLLEŞTİRME
+       * anahtarı. `queueId` yayıncıya özeldir: iki connector örneği aynı yorumu
+       * işlerse FARKLI queueId üretir ve widget aynı sesi iki kez çalar. Olay
+       * kimliği ise kaynakta (TikTok mesajı) üretildiği için ortaktır; widget
+       * `actionId + sourceEventId` çiftini bir kez oynatır.
+       */
+      sourceEventId: z.string().optional(),
     }),
   }),
   z.object({ kind: z.literal("widgetSettings"), payload: widgetSettingsSchema }),
