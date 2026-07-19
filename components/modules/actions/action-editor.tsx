@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/modal";
 import { Toggle } from "@/components/ui/toggle";
 import { useToast } from "@/components/ui/toast";
 import { useApp } from "@/components/providers/app-provider";
+import { useOverlayId } from "@/lib/overlay/use-overlay-id";
 import { uploadActionMedia } from "@/lib/supabase/upload-media";
 import {
   SCREEN_MAX,
@@ -456,8 +457,18 @@ export function ActionEditor({
   /** Kaydetme hatası — sessizce yutulursa "kaydedilmiyor" gibi görünür. */
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  // Widget URL'si yalnız origin + ekran numarasına bağlı — türetilmiş değer, state değil.
-  const widgetUrl = backend.widgets.url("myactions", { screen: draft.screen });
+  // Widget URL'si — overlay kimliği ŞART.
+  //
+  // NEDEN: `id` olmadan widget sayfası "demo" moduna düşer (aynı-tarayıcı bus),
+  // yani OBS/LIVE Studio'ya eklendiğinde connector'dan hiçbir şey almaz ve
+  // SESSİZCE boş kalır. Bu URL eskiden kimliksiz üretiliyordu, dolayısıyla
+  // buradan kopyalayan kullanıcı Ekran Ayarları'ndakinden FARKLI (ve çalışmayan)
+  // bir adres alıyordu.
+  const overlayId = useOverlayId();
+  const widgetUrl = backend.widgets.url(
+    "myactions",
+    overlayId ? { id: overlayId, screen: draft.screen } : { screen: draft.screen },
+  );
 
   function patch(next: Partial<ActionDraft>) {
     setDraft((d) => ({ ...d, ...next }));
