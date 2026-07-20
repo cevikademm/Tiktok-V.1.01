@@ -1,4 +1,5 @@
 import type { LiveEvent, LiveUser } from "@/lib/schemas/live";
+import { GIFT_CATALOG, findGiftByCoins } from "@/lib/data/gift-catalog";
 import { newId } from "./store";
 
 /**
@@ -17,20 +18,11 @@ const NAMES: Array<[string, string]> = [
   ["selin.art", "Selin"],
 ];
 
-/** TikTok hediye ekonomisi referansı — PRD Ek A (coin değerleri birebir). */
-export const GIFT_CATALOG: Array<{ id: string; name: string; coins: number }> = [
-  { id: "5655", name: "Rose", coins: 1 },
-  { id: "6064", name: "Panda", coins: 5 },
-  { id: "5827", name: "Perfume", coins: 20 },
-  { id: "5487", name: "I Love You", coins: 49 },
-  { id: "5879", name: "Confetti", coins: 100 },
-  { id: "6784", name: "Money Rain", coins: 500 },
-  { id: "6427", name: "Disco Ball", coins: 1000 },
-  { id: "6091", name: "Airplane", coins: 6000 },
-  { id: "6415", name: "Planet", coins: 15000 },
-  { id: "7168", name: "Lion", coins: 29999 },
-  { id: "6888", name: "Universe", coins: 44999 },
-];
+/**
+ * Demo akışında kullanılan ucuz hediyeler — gerçek yayında en sık gelenler.
+ * Tam katalog `@/lib/data/gift-catalog` içindedir.
+ */
+const COMMON_GIFTS = GIFT_CATALOG.filter((g) => !g.interactive && g.coins <= 10);
 
 const seenUsers = new Set<string>();
 
@@ -91,8 +83,8 @@ export function simulateEvent(
 
     case "gift": {
       const gift = options.coins
-        ? (GIFT_CATALOG.find((g) => g.coins >= options.coins!) ?? GIFT_CATALOG[0])
-        : GIFT_CATALOG[Math.floor(Math.random() * 5)];
+        ? (findGiftByCoins(options.coins) ?? COMMON_GIFTS[0])
+        : COMMON_GIFTS[Math.floor(Math.random() * COMMON_GIFTS.length)];
       return {
         ...base("gift", user),
         giftId: gift.id,

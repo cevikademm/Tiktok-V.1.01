@@ -285,9 +285,13 @@ ana Enabled toggle'ının kalıcılığı ve 20 tipin **yapılandırma alanları
    state, mount'ta bir kez okunur).
 10. **Pro limiti istemci tarafında.** 5 eylem sınırı yalnız butonu `disabled` yapar
     (`actions-page.tsx:396`); `backend.actions.create()` limiti **doğrulamaz**.
-11. **Hediye kataloğu statik.** `gift_specific` seçicisi mock `GIFT_CATALOG`'u kullanır
-    (11 hediye — `lib/data/mock/simulator.ts:21-33`, PRD Ek A coin değerleri birebir).
-    PRD §5.3'ün öngördüğü "API'den bölgesel katalog" Faz 2.
+11. **Hediye kataloğu statik.** `gift_specific` seçicisi `lib/data/gift-catalog.ts`
+    içindeki 154 hediyelik TR kataloğunu kullanır (ad + coin değeri TikTok TR hediye
+    panelinden alınmıştır; ikonlar `public/gifts/<slug>.png`). Katalog `id`'leri
+    **slug**'dır, TikTok'un sayısal `giftId`'si değil — bu yüzden eşleştirme id
+    tutmazsa hediye **adına** düşer (`lib/engine/matcher.ts`, `giftNameEquals`).
+    PRD §5.3'ün öngördüğü "API'den bölgesel katalog" (bölgeye göre değişen hediye
+    listesi ve gerçek sayısal id'ler) hâlâ Faz 2.
 12. **Sticker/emote seçicileri ham metin alanı.** PRD §5.3 sticker modalı (Partner + Global
     grid) ve emote seçici öngörür; kod düz `<input>` ile `stickerId`/`emoteId` ister
     (`event-editor.tsx:136-157`).

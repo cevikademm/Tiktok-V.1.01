@@ -7,7 +7,8 @@
 
 import { z } from "zod";
 import { injectSynthetic } from "@/lib/server/overlay-hub";
-import { simulateEvent, GIFT_CATALOG } from "@/lib/data/mock/simulator";
+import { simulateEvent } from "@/lib/data/mock/simulator";
+import { findGiftById } from "@/lib/data/gift-catalog";
 import {
   getAdminSupabase,
   OVERLAY_CONFIG_TABLE,
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
   const ev = simulateEvent(kind, { coins, likes, comment });
   // Belirli hediye istenmişse giftId/isim/coin'i katalogdan uygula.
   if (kind === "gift" && giftId) {
-    const gift = GIFT_CATALOG.find((g) => g.id === giftId);
+    const gift = findGiftById(giftId);
     ev.giftId = giftId;
     if (gift) {
       ev.giftName = gift.name;

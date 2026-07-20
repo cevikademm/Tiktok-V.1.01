@@ -6,7 +6,7 @@ import { useApp } from "@/components/providers/app-provider";
 import { Button } from "@/components/ui/button";
 import { Field, Input, Select } from "@/components/ui/field";
 import { Modal } from "@/components/ui/modal";
-import { GIFT_CATALOG } from "@/lib/data/mock/simulator";
+import { GiftPicker } from "./gift-picker";
 import {
   eventSchema,
   eventSignature,
@@ -103,21 +103,11 @@ function TriggerConditions({
     case "gift_specific":
       return (
         <Field label={t("actionsandevents.eventEditor.giftLabel")} htmlFor="cond-gift" required>
-          <Select
+          <GiftPicker
             id="cond-gift"
-            value={conditions.giftId ?? ""}
-            onChange={(e) => {
-              const gift = GIFT_CATALOG.find((g) => g.id === e.target.value);
-              onChange({ giftId: e.target.value, giftName: gift?.name });
-            }}
-          >
-            <option value="">—</option>
-            {GIFT_CATALOG.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.name} ({g.coins})
-              </option>
-            ))}
-          </Select>
+            value={conditions.giftId}
+            onChange={(gift) => onChange({ giftId: gift.id, giftName: gift.name })}
+          />
         </Field>
       );
 

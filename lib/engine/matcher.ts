@@ -6,6 +6,11 @@ import type { LiveEvent } from "@/lib/schemas/live";
  * Saf TypeScript: DOM/framework bağımlılığı YOK.
  */
 
+/** Hediye adı karşılaştırması — TR yereline duyarlı (İ/ı), boşluk toleranslı. */
+function giftNameEquals(a: string, b: string): boolean {
+  return a.trim().toLocaleLowerCase("tr") === b.trim().toLocaleLowerCase("tr");
+}
+
 /** Canlı olay tipi → hangi tetikleyicileri besleyebilir. */
 const TRIGGERS_FOR_EVENT: Record<LiveEvent["type"], TriggerType[]> = {
   chat: ["chat", "command"],
@@ -75,9 +80,14 @@ export function matchesConditions(rule: StreamEvent, ev: LiveEvent): boolean {
       if (ev.repeatEnd === false) return false;
       return (ev.coins ?? 0) >= (c.minCoins ?? 1);
 
-    case "gift_specific":
+    case "gift_specific": {
       if (ev.repeatEnd === false) return false;
-      return !!c.giftId && ev.giftId === c.giftId;
+      // Katalog id'si slug'dır; TikTok canlı olayı ise kendi sayısal giftId'sini
+      // gönderir. Bu yüzden id tutmazsa hediye ADI üzerinden de eşleştiririz.
+      if (c.giftId && ev.giftId === c.giftId) return true;
+      if (!c.giftName || !ev.giftName) return false;
+      return giftNameEquals(ev.giftName, c.giftName);
+    }
 
     case "gift_likes_min":
       return (ev.likeCount ?? 0) >= (c.minLikes ?? 1);
